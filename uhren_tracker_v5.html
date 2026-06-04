@@ -1,0 +1,868 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Uhrentracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#0c0d10;--bg1:#13151a;--bg2:#1a1d24;--bg3:#22262f;--bg4:#2a2f3a;
+  --border:#252930;--border2:#343a48;
+  --t1:#eef0f5;--t2:#8a95a8;--t3:#4a5268;
+  --accent:#4f8ef7;--accent2:#2d5fc4;
+  --green:#2ecc8a;--red:#e05555;--amber:#f5a623;
+  --r:10px;--rs:7px;
+}
+html,body{background:var(--bg0);color:var(--t1);font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:14px;line-height:1.5}
+.app{min-height:620px;background:var(--bg0);position:relative}
+.nav{display:flex;gap:2px;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.nav button{background:transparent;border:none;padding:7px 13px;border-radius:var(--rs);font-size:13px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.nav button.active{background:var(--bg3);color:var(--t1);border:1px solid var(--border2)}
+.nav button:hover:not(.active){background:var(--bg2);color:var(--t1)}
+.tab{display:none;padding:16px}.tab.active{display:block}
+.card{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);padding:15px;margin-bottom:12px}
+.stitle{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px}
+.metric .ml{font-size:11px;color:var(--t3);margin-bottom:4px}
+.metric .mv{font-size:22px;font-weight:700;color:var(--t1)}
+.metric .ms{font-size:11px;color:var(--t3);margin-top:2px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--rs);background:var(--bg2);color:var(--t1);font-size:13px;font-family:inherit;transition:border .15s;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a95a8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+select option{background:var(--bg2);color:var(--t1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--t2);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--bg3);color:var(--t1)}
+.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-p:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.btn-s{background:#0d2818;color:var(--green);border-color:#1a4028}.btn-s:hover{background:#1a4028;color:var(--green)}
+.btn-d{background:transparent;color:var(--red);border-color:#3a1818}.btn-d:hover{background:#2a1010;border-color:var(--red)}
+.fg{margin-bottom:10px}.fg label{display:block;font-size:11px;color:var(--t3);margin-bottom:4px;font-weight:500}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.watch-row{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:7px;transition:border-color .15s}
+.watch-row:hover{border-color:var(--border2)}
+.log-row{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-bottom:1px solid var(--border);font-size:13px}
+.log-row:last-child{border-bottom:none}
+.log-row:hover{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.bok{background:#0d2e1e;color:var(--green)}.bwarn{background:#2e1e05;color:var(--amber)}.berr{background:#2e0d0d;color:var(--red)}
+.brand-badge{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.5px;flex-shrink:0;margin-right:12px;font-family:'Courier New',monospace}
+.reminder{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:13px;color:#8db8ff}
+.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .15s}
+.drop-zone:hover,.drop-zone.drag-over{background:var(--bg2);border-color:var(--accent)}
+.schema-wrap{margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;font-size:11px}
+.schema-row{display:flex;border-bottom:1px solid var(--border)}.schema-row:last-child{border-bottom:none}
+.sc{padding:5px 10px;border-right:1px solid var(--border);color:var(--t2);flex:1}.sc:last-child{border-right:none}
+.sc.sh{background:var(--bg3);font-weight:600;color:var(--t1)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{background:var(--bg3);padding:6px 9px;text-align:left;border:1px solid var(--border);color:var(--t3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.tbl td{padding:5px 9px;border:1px solid var(--border);color:var(--t1)}
+.tbl tr:nth-child(even) td{background:var(--bg2)}
+input[type=file]{display:none}
+.modal-wrap{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:flex-start;justify-content:center;padding-top:60px}
+.modal-wrap.open{display:flex}
+.modal{background:var(--bg2);border-radius:var(--r);padding:20px;width:300px;border:1px solid var(--border2);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--t1)}
+.mfoot{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
+.empty{text-align:center;padding:36px;color:var(--t3);font-size:13px}
+svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+
+/* ── Startseite spezifisch ── */
+.day-block{background:var(--bg1);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.day-label{font-size:13px;font-weight:700;color:var(--t1)}
+.day-sub{font-size:11px;color:var(--t3)}
+.day-today{color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);padding:2px 8px;border-radius:20px}
+.day-watch-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)}
+.day-watch-row:last-child{border-bottom:none}
+.day-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.day-empty{padding:10px 14px;font-size:12px;color:var(--t3);font-style:italic}
+
+/* ── Export Panel ── */
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.export-opt{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;cursor:pointer;transition:border-color .15s}
+.export-opt:hover{border-color:var(--border2)}
+.export-opt .eo-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:3px}
+.export-opt .eo-desc{font-size:11px;color:var(--t3);line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+<div class="nav">
+  <button class="active" data-tab="start">
+    <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Übersicht
+  </button>
+  <button data-tab="heute">
+    <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
+    Heute
+  </button>
+  <button data-tab="uhren">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+    Uhren
+  </button>
+  <button data-tab="log">
+    <svg class="ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Logbuch
+  </button>
+  <button data-tab="stats">
+    <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Statistiken
+  </button>
+  <button data-tab="export">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export / Import
+  </button>
+</div>
+
+<!-- ÜBERSICHT / STARTSEITE -->
+<div id="tab-start" class="tab active">
+  <div id="start-reminder"></div>
+  <div class="metric-grid" id="start-metrics"></div>
+  <div class="stitle" style="padding:0 2px 8px">Letzte Tage</div>
+  <div id="start-days"></div>
+</div>
+
+<!-- HEUTE -->
+<div id="tab-heute" class="tab">
+  <div id="reminder-area"></div>
+  <div class="card">
+    <div class="stitle">Welche Uhr trägst du heute?</div>
+    <div class="fg"><label>Datum</label><input type="date" id="log-date"></div>
+    <div class="fg"><label>Uhr auswählen</label><select id="log-watch"><option value="">— Uhr wählen —</option></select></div>
+    <div class="fg" style="margin-bottom:14px"><label>Notiz (optional)</label><input type="text" id="log-note" placeholder="z.B. Hochzeit, Bürotag, Wanderung …"></div>
+    <button class="btn btn-p" id="btn-add-log">
+      <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Eintragen
+    </button>
+  </div>
+  <div class="card" id="today-card" style="display:none">
+    <div class="stitle">Heute eingetragen</div>
+    <div id="today-list"></div>
+  </div>
+</div>
+
+<!-- UHREN -->
+<div id="tab-uhren" class="tab">
+  <div class="card">
+    <div class="stitle">Neue Uhr hinzufügen</div>
+    <div class="frow" style="margin-bottom:10px">
+      <div class="fg" style="margin-bottom:0"><label>Name / Modell</label><input type="text" id="w-name" placeholder="Submariner Date"></div>
+      <div class="fg" style="margin-bottom:0"><label>Marke</label><input type="text" id="w-brand" placeholder="Rolex"></div>
+    </div>
+    <button class="btn btn-p" id="btn-add-watch">
+      <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Hinzufügen
+    </button>
+  </div>
+  <div id="watch-list"></div>
+</div>
+
+<!-- LOGBUCH -->
+<div id="tab-log" class="tab">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span class="stitle" style="margin-bottom:0">Alle Einträge</span>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden"><div id="log-list"></div></div>
+</div>
+
+<!-- STATISTIKEN -->
+<div id="tab-stats" class="tab">
+  <div class="metric-grid" id="metric-grid"></div>
+  <div class="card">
+    <div class="stitle">Häufigkeit pro Uhr</div>
+    <div id="bar-wrap" style="position:relative;width:100%;height:200px"><canvas id="barChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Zeitverlauf — letzte 30 Tage</div>
+    <div style="position:relative;width:100%;height:160px"><canvas id="lineChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Verteilung</div>
+    <div id="pie-legend" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px"></div>
+    <div style="position:relative;width:100%;height:180px"><canvas id="pieChart"></canvas></div>
+  </div>
+</div>
+
+<!-- EXPORT / IMPORT -->
+<div id="tab-export" class="tab">
+
+  <!-- EXPORT -->
+  <div class="card">
+    <div class="stitle">Daten exportieren</div>
+    <div class="export-grid">
+      <div class="export-opt" id="exp-xls">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <svg style="width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <div class="eo-title">Matrix-Excel (.xlsx)</div>
+        </div>
+        <div class="eo-desc">Gleiche Format wie der Import: Uhren als Spalten, Tage als Zeilen, x = getragen. Ideal zum Weiterarbeiten.</div>
+      </div>
+      <div class="export-opt" id="exp-json">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <svg style="width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <div class="eo-title">Backup JSON</div>
+        </div>
+        <div class="eo-desc">Vollständiges Daten-Backup aller Uhren und Einträge. Kann jederzeit reimportiert werden.</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:6px;font-weight:500">Zeitraum für Excel-Export</label>
+      <div class="frow">
+        <div class="fg" style="margin-bottom:0"><label>Von</label><input type="date" id="exp-from"></div>
+        <div class="fg" style="margin-bottom:0"><label>Bis</label><input type="date" id="exp-to"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-s" id="btn-exp-xls">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Excel exportieren
+      </button>
+      <button class="btn" id="btn-exp-json">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        JSON exportieren
+      </button>
+    </div>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="card">
+    <div class="stitle">Excel importieren</div>
+    <div class="drop-zone" id="drop-zone">
+      <svg style="width:32px;height:32px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 10px" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <div style="font-size:14px;font-weight:600;color:var(--t1)">Excel-Datei hier ablegen</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:4px">oder klicken zum Auswählen (.xlsx, .xls, .csv)</div>
+    </div>
+    <input type="file" id="file-in" accept=".xlsx,.xls,.csv">
+    <p style="font-size:12px;color:var(--t3);margin-top:10px;line-height:1.7">
+      <strong style="color:var(--t2)">Format:</strong> Erste Zeile = Uhrenmarken als Spaltenköpfe. Erste Spalte = Datum pro Zeile. Zellen mit <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">x</code>, <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">1</code> oder <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">ja</code> = getragen.
+    </p>
+    <div class="schema-wrap">
+      <div class="schema-row"><div class="sc sh">Datum</div><div class="sc sh">Rolex Sub</div><div class="sc sh">Omega Speed</div><div class="sc sh">Tudor BB</div></div>
+      <div class="schema-row"><div class="sc">2025-01-01</div><div class="sc" style="color:var(--green);font-weight:700">x</div><div class="sc"></div><div class="sc"></div></div>
+      <div class="schema-row"><div class="sc">2025-01-02</div><div class="sc"></div><div class="sc" style="color:var(--green);font-weight:700">x</div><div class="sc"></div></div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-p" id="btn-imp-open">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Datei auswählen
+      </button>
+      <button class="btn" id="btn-template">
+        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Vorlage herunterladen
+      </button>
+    </div>
+  </div>
+
+  <div id="imp-preview" style="display:none">
+    <div class="card">
+      <div class="stitle">Import-Vorschau</div>
+      <div id="imp-stats" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <div style="overflow-x:auto"><table class="tbl" id="imp-table"></table></div>
+    </div>
+    <div class="card">
+      <div class="stitle">Import-Optionen</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;font-size:13px;color:var(--t2)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="imp-mode" value="merge" checked> Zusammenführen (bestehende Einträge behalten)</label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="imp-mode" value="replace"> Ersetzen (alle Logs löschen und neu aufbauen)</label>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" id="btn-do-import">
+          <svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Jetzt importieren
+        </button>
+        <button class="btn" id="btn-reset-import">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Abbrechen
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="imp-done" style="display:none">
+    <div class="card">
+      <div class="stitle">Import abgeschlossen</div>
+      <div id="imp-done-msg"></div>
+      <div id="imp-result-list" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-p" id="btn-reset-import2">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Weiteren Import
+        </button>
+        <button class="btn btn-s" id="btn-go-stats">
+          <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Statistiken ansehen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-wrap" id="modal-watch">
+  <div class="modal">
+    <h3>Uhr bearbeiten</h3>
+    <input type="hidden" id="edit-wi">
+    <div class="fg"><label>Name / Modell</label><input type="text" id="edit-wname"></div>
+    <div class="fg"><label>Marke</label><input type="text" id="edit-wbrand"></div>
+    <div class="mfoot">
+      <button class="btn" id="btn-cancel-watch">Abbrechen</button>
+      <button class="btn btn-p" id="btn-save-watch">Speichern</button>
+    </div>
+  </div>
+</div>
+<div class="modal-wrap" id="modal-log">
+  <div class="modal">
+    <h3>Eintrag bearbeiten</h3>
+    <input type="hidden" id="edit-li">
+    <div class="fg"><label>Datum</label><input type="date" id="edit-ldate"></div>
+    <div class="fg"><label>Uhr</label><select id="edit-lwatch"></select></div>
+    <div class="fg"><label>Notiz</label><input type="text" id="edit-lnote"></div>
+    <div class="mfoot">
+      <button class="btn" id="btn-cancel-log">Abbrechen</button>
+      <button class="btn btn-p" id="btn-save-log">Speichern</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script src="xlsx.full.min.js"></script>
+<script src="chart.umd.js"></script>
+<script>
+// ── Storage ───────────────────────────────────────────────
+function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function saveAll(){sv('wt_w',watches);sv('wt_l',logs);}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+
+var watches=ld('wt_w',[]);
+var logs=ld('wt_l',[]);
+var impEntries=[];
+var barC,lineC,pieC;
+
+var COLORS=['#4f8ef7','#2ecc8a','#f87171','#fbbf24','#a78bfa','#34d399','#f472b6','#67e8f9','#fb923c','#93c5fd'];
+
+var WEEKDAYS=['So','Mo','Di','Mi','Do','Fr','Sa'];
+var MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+function todayStr(){return new Date().toISOString().slice(0,10);}
+document.getElementById('log-date').value=todayStr();
+
+// Init export date range: current year
+(function(){
+  var y=new Date().getFullYear();
+  document.getElementById('exp-from').value=y+'-01-01';
+  document.getElementById('exp-to').value=todayStr();
+})();
+
+// ── Helpers ───────────────────────────────────────────────
+function formatDate(str){
+  var d=new Date(str+'T00:00:00');
+  return WEEKDAYS[d.getDay()]+', '+d.getDate()+'. '+MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
+function isToday(str){return str===todayStr();}
+
+function populateSel(id,cur){
+  var s=document.getElementById(id);
+  var v=cur||s.value;
+  s.innerHTML='<option value="">— Uhr wählen —</option>';
+  watches.forEach(function(w){
+    var o=document.createElement('option');
+    o.value=w.id;o.textContent=w.name+' – '+w.brand;
+    s.appendChild(o);
+  });
+  if(v)s.value=v;
+}
+
+function brandBadge(brand,idx){
+  var known={
+    rolex:{bg:'#0a1f0a',color:'#4ade80',border:'#1a4a1a',abbr:'RLX'},
+    omega:{bg:'#0a0f2a',color:'#7eb3f5',border:'#1a2a5e',abbr:'OMG'},
+    tudor:{bg:'#1a0a0a',color:'#f87171',border:'#4a1a1a',abbr:'TDR'},
+    seiko:{bg:'#0a1a2a',color:'#67e8f9',border:'#0a3040',abbr:'SEI'},
+    patek:{bg:'#1a1500',color:'#fbbf24',border:'#4a3800',abbr:'PP'},
+    iwc:{bg:'#100a2a',color:'#a78bfa',border:'#2a1a50',abbr:'IWC'},
+    breitling:{bg:'#0a1a28',color:'#93c5fd',border:'#0a3050',abbr:'BRT'},
+    ap:{bg:'#0a1a10',color:'#34d399',border:'#0a3820',abbr:'AP'},
+    jaeger:{bg:'#1a0a18',color:'#f472b6',border:'#40103a',abbr:'JLC'},
+  };
+  var key=brand.toLowerCase().replace(/[\s\-]/g,'');
+  var match=null;
+  for(var k in known){if(key.indexOf(k)!==-1){match=known[k];break;}}
+  var fallbacks=[
+    {bg:'#1a1f2e',color:'#7eb3f5',border:'#2a3a5e'},
+    {bg:'#1a2a1a',color:'#4ade80',border:'#2d5a2d'},
+    {bg:'#2a1a1a',color:'#f87171',border:'#5a2a2a'},
+    {bg:'#2a2210',color:'#fbbf24',border:'#5a4a10'},
+    {bg:'#1e1a2e',color:'#a78bfa',border:'#3a2a5e'},
+  ];
+  var s=match||(fallbacks[idx%fallbacks.length]);
+  var abbr=match?match.abbr:(brand.slice(0,3).toUpperCase()||'—');
+  return '<div class="brand-badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.border+'">'+abbr+'</div>';
+}
+
+// ── Tab navigation ─────────────────────────────────────────
+document.querySelector('.nav').addEventListener('click',function(e){
+  var btn=e.target.closest('button[data-tab]');
+  if(!btn)return;
+  var t=btn.dataset.tab;
+  document.querySelectorAll('.tab').forEach(function(el){el.classList.remove('active');});
+  document.querySelectorAll('.nav button').forEach(function(el){el.classList.remove('active');});
+  document.getElementById('tab-'+t).classList.add('active');
+  btn.classList.add('active');
+  if(t==='start')renderStart();
+  if(t==='stats')renderStats();
+  if(t==='heute'){populateSel('log-watch');renderReminder();}
+  if(t==='log')renderLog();
+  if(t==='uhren')renderWatches();
+});
+
+// ── STARTSEITE ─────────────────────────────────────────────
+function renderStart(){
+  // Reminder
+  var today=todayStr();
+  var ra=document.getElementById('start-reminder');
+  if(!logs.some(function(l){return l.date===today;})){
+    ra.innerHTML='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Noch kein Eintrag für heute – <button data-tab="heute" class="btn btn-p" style="padding:3px 10px;font-size:12px;margin-left:4px">Jetzt eintragen</button></div>';
+  } else {
+    ra.innerHTML='';
+  }
+
+  // Metriken
+  var year=new Date().getFullYear();
+  var yLogs=logs.filter(function(l){return l.date.indexOf(year)===0;});
+  var days=new Set(logs.map(function(l){return l.date;})).size;
+  var fav=watches.reduce(function(a,w){
+    var c=logs.filter(function(l){return l.watchId===w.id;}).length;
+    return c>a.c?{n:w.name,c:c}:a;
+  },{n:'—',c:0});
+  document.getElementById('start-metrics').innerHTML=
+    '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
+    '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+fav.n+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+
+  // Letzte 5 Tage mit Einträgen
+  var allDates=Array.from(new Set(logs.map(function(l){return l.date;}))).sort().reverse().slice(0,5);
+
+  // Fülle fehlende Tage auf bis zu heute
+  var filled=[];
+  for(var i=0;i<5;i++){
+    var d=new Date();d.setDate(d.getDate()-i);
+    filled.push(d.toISOString().slice(0,10));
+  }
+  // Merge: zeige die letzten 5 Tage (mit oder ohne Eintrag)
+  var showDates=filled;
+
+  var html='';
+  showDates.forEach(function(dateStr){
+    var dayLogs=logs.filter(function(l){return l.date===dateStr;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+    var todayMark=isToday(dateStr)?'<span class="day-today">Heute</span>':'';
+    html+='<div class="day-block">';
+    html+='<div class="day-header"><div><span class="day-label">'+formatDate(dateStr)+'</span></div>'+todayMark+'</div>';
+    if(dayLogs.length===0){
+      html+='<div class="day-empty">Kein Eintrag</div>';
+    } else {
+      dayLogs.forEach(function(l){
+        var w=watches.find(function(w){return w.id===l.watchId;});
+        var gi=watches.findIndex(function(w){return w.id===l.watchId;});
+        var c=COLORS[gi%COLORS.length];
+        html+='<div class="day-watch-row">';
+        html+='<div class="day-dot" style="background:'+c+'"></div>';
+        html+='<div style="flex:1">';
+        html+='<div style="font-size:13px;font-weight:600;color:var(--t1)">'+(w?w.name+' <span style="font-weight:400;color:var(--t3)">'+w.brand+'</span>':'Gelöschte Uhr')+'</div>';
+        if(l.note)html+='<div style="font-size:11px;color:var(--t3)">'+l.note+'</div>';
+        html+='</div>';
+        html+='</div>';
+      });
+    }
+    html+='</div>';
+  });
+  document.getElementById('start-days').innerHTML=html;
+}
+
+// ── HEUTE ─────────────────────────────────────────────────
+function renderReminder(){
+  var today=todayStr();
+  var yest=new Date();yest.setDate(yest.getDate()-1);
+  var ys=yest.toISOString().slice(0,10);
+  var h='';
+  if(!logs.some(function(l){return l.date===today;}))
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Noch kein Eintrag für heute.</div>';
+  if(logs.length>0&&!logs.some(function(l){return l.date===ys;}))
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gestern ('+ys+') fehlt noch ein Eintrag.</div>';
+  document.getElementById('reminder-area').innerHTML=h;
+  var tl=logs.filter(function(l){return l.date===today;});
+  var tc=document.getElementById('today-card');
+  if(!tl.length){tc.style.display='none';return;}
+  tc.style.display='block';
+  document.getElementById('today-list').innerHTML=tl.map(function(l){
+    var w=watches.find(function(w){return w.id===l.watchId;});
+    var gi=watches.findIndex(function(w){return w.id===l.watchId;});
+    var c=COLORS[gi%COLORS.length];
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">'+
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
+      '<span style="font-weight:600">'+(w?w.name+' ('+w.brand+')':'?')+'</span>'+
+      (l.note?'<span style="font-size:11px;color:var(--t3)">'+l.note+'</span>':'')+
+      '</div>';
+  }).join('');
+}
+
+document.getElementById('btn-add-log').addEventListener('click',function(){
+  var date=document.getElementById('log-date').value;
+  var watchId=document.getElementById('log-watch').value;
+  var note=document.getElementById('log-note').value.trim();
+  if(!date||!watchId){alert('Bitte Datum und Uhr auswählen.');return;}
+  logs.unshift({date:date,watchId:watchId,note:note,id:uid()});
+  saveAll();
+  document.getElementById('log-note').value='';
+  renderReminder();
+});
+
+// ── UHREN ─────────────────────────────────────────────────
+function renderWatches(){
+  populateSel('log-watch');
+  var el=document.getElementById('watch-list');
+  if(!watches.length){el.innerHTML='<div class="empty">Noch keine Uhren erfasst.</div>';return;}
+  el.innerHTML=watches.map(function(w,i){
+    var count=logs.filter(function(l){return l.watchId===w.id;}).length;
+    return '<div class="watch-row">'+
+      '<div style="display:flex;align-items:center">'+brandBadge(w.brand,i)+
+      '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+w.name+'</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+w.brand+'&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen</div></div></div>'+
+      '<div style="display:flex;gap:6px">'+
+      '<button class="btn" style="padding:6px 10px" data-action="edit-watch" data-idx="'+i+'" aria-label="Bearbeiten">'+
+      '<svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
+      '<button class="btn btn-d" style="padding:6px 10px" data-action="delete-watch" data-idx="'+i+'" aria-label="Löschen">'+
+      '<svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
+      '</div></div>';
+  }).join('');
+}
+
+document.getElementById('btn-add-watch').addEventListener('click',function(){
+  var name=document.getElementById('w-name').value.trim();
+  var brand=document.getElementById('w-brand').value.trim();
+  if(!name||!brand){alert('Bitte Name und Marke eingeben.');return;}
+  watches.push({id:uid(),name:name,brand:brand});
+  saveAll();
+  document.getElementById('w-name').value='';
+  document.getElementById('w-brand').value='';
+  renderWatches();
+});
+
+document.getElementById('watch-list').addEventListener('click',function(e){
+  var btn=e.target.closest('button[data-action]');
+  if(!btn)return;
+  var action=btn.dataset.action;
+  var idx=parseInt(btn.dataset.idx,10);
+  if(action==='edit-watch'){
+    document.getElementById('edit-wi').value=idx;
+    document.getElementById('edit-wname').value=watches[idx].name;
+    document.getElementById('edit-wbrand').value=watches[idx].brand;
+    document.getElementById('modal-watch').classList.add('open');
+  } else if(action==='delete-watch'){
+    if(!confirm('Uhr "'+watches[idx].name+'" und alle zugehörigen Einträge löschen?'))return;
+    var wid=watches[idx].id;
+    watches.splice(idx,1);
+    logs=logs.filter(function(l){return l.watchId!==wid;});
+    saveAll();renderWatches();
+  }
+});
+
+document.getElementById('btn-save-watch').addEventListener('click',function(){
+  var i=parseInt(document.getElementById('edit-wi').value,10);
+  watches[i].name=document.getElementById('edit-wname').value.trim();
+  watches[i].brand=document.getElementById('edit-wbrand').value.trim();
+  saveAll();document.getElementById('modal-watch').classList.remove('open');renderWatches();
+});
+document.getElementById('btn-cancel-watch').addEventListener('click',function(){document.getElementById('modal-watch').classList.remove('open');});
+
+// ── LOGBUCH ───────────────────────────────────────────────
+function renderLog(){
+  var el=document.getElementById('log-list');
+  if(!logs.length){el.innerHTML='<div class="empty">Noch keine Einträge vorhanden.</div>';return;}
+  var sorted=logs.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  el.innerHTML=sorted.map(function(l){
+    var oi=logs.indexOf(l);
+    var w=watches.find(function(w){return w.id===l.watchId;});
+    var gi=watches.findIndex(function(w){return w.id===l.watchId;});
+    var c=COLORS[gi%COLORS.length];
+    return '<div class="log-row">'+
+      '<div style="display:flex;align-items:center;gap:9px">'+
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
+      '<div><div style="font-weight:600">'+(w?w.name+' ('+w.brand+')':'Gelöschte Uhr')+'</div>'+
+      (l.note?'<div style="font-size:11px;color:var(--t3)">'+l.note+'</div>':'')+
+      '</div></div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+      '<span style="font-size:12px;color:var(--t3)">'+l.date+'</span>'+
+      '<button class="btn" style="padding:5px 8px" data-action="edit-log" data-idx="'+oi+'"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
+      '<button class="btn btn-d" style="padding:5px 8px" data-action="delete-log" data-idx="'+oi+'"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
+      '</div></div>';
+  }).join('');
+}
+
+document.getElementById('log-list').addEventListener('click',function(e){
+  var btn=e.target.closest('button[data-action]');
+  if(!btn)return;
+  var action=btn.dataset.action;
+  var idx=parseInt(btn.dataset.idx,10);
+  if(action==='delete-log'){
+    if(!confirm('Diesen Eintrag löschen?'))return;
+    logs.splice(idx,1);saveAll();renderLog();
+  } else if(action==='edit-log'){
+    document.getElementById('edit-li').value=idx;
+    document.getElementById('edit-ldate').value=logs[idx].date;
+    document.getElementById('edit-lnote').value=logs[idx].note||'';
+    populateSel('edit-lwatch',logs[idx].watchId);
+    document.getElementById('modal-log').classList.add('open');
+  }
+});
+
+document.getElementById('btn-save-log').addEventListener('click',function(){
+  var i=parseInt(document.getElementById('edit-li').value,10);
+  logs[i].date=document.getElementById('edit-ldate').value;
+  logs[i].watchId=document.getElementById('edit-lwatch').value;
+  logs[i].note=document.getElementById('edit-lnote').value.trim();
+  saveAll();document.getElementById('modal-log').classList.remove('open');renderLog();
+});
+document.getElementById('btn-cancel-log').addEventListener('click',function(){document.getElementById('modal-log').classList.remove('open');});
+
+// ── STATISTIKEN ───────────────────────────────────────────
+function renderStats(){
+  var year=new Date().getFullYear();
+  var yLogs=logs.filter(function(l){return l.date.indexOf(year)===0;});
+  var days=new Set(logs.map(function(l){return l.date;})).size;
+  var fav=watches.reduce(function(a,w){var c=logs.filter(function(l){return l.watchId===w.id;}).length;return c>a.c?{n:w.name,c:c}:a;},{n:'—',c:0});
+  document.getElementById('metric-grid').innerHTML=
+    '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
+    '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:14px">'+fav.n+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+  var counts=watches.map(function(w){return logs.filter(function(l){return l.watchId===w.id;}).length;});
+  var labels=watches.map(function(w){return w.name;});
+  var bh=Math.max(160,watches.length*44+60);
+  document.getElementById('bar-wrap').style.height=bh+'px';
+  if(barC)barC.destroy();
+  barC=new Chart(document.getElementById('barChart'),{
+    type:'bar',
+    data:{labels:labels,datasets:[{data:counts,backgroundColor:COLORS.slice(0,watches.length),borderWidth:0,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+      x:{beginAtZero:true,ticks:{stepSize:1,color:'#4a5268'},grid:{color:'#1a1d24'}},
+      y:{ticks:{color:'#8a95a8'},grid:{color:'#1a1d24'}}
+    }}
+  });
+  var last30=[];
+  for(var i=0;i<30;i++){var d=new Date();d.setDate(d.getDate()-29+i);last30.push(d.toISOString().slice(0,10));}
+  if(lineC)lineC.destroy();
+  lineC=new Chart(document.getElementById('lineChart'),{
+    type:'line',
+    data:{labels:last30.map(function(d){return d.slice(5);}),datasets:[{data:last30.map(function(d){return logs.filter(function(l){return l.date===d;}).length;}),borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.1)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#4f8ef7'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
+      x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:8,color:'#4a5268'},grid:{color:'#1a1d24'}},
+      y:{beginAtZero:true,ticks:{stepSize:1,color:'#4a5268'},grid:{color:'#1a1d24'}}
+    }}
+  });
+  document.getElementById('pie-legend').innerHTML=watches.map(function(w,i){
+    var c=counts[i],pct=logs.length?Math.round(c/logs.length*100):0;
+    return '<span style="display:flex;align-items:center;gap:5px;color:var(--t2)"><span style="width:9px;height:9px;border-radius:2px;background:'+COLORS[i%COLORS.length]+'"></span>'+w.name+' '+pct+'%</span>';
+  }).join('');
+  if(pieC)pieC.destroy();
+  pieC=new Chart(document.getElementById('pieChart'),{
+    type:'doughnut',
+    data:{labels:labels,datasets:[{data:counts,backgroundColor:COLORS.slice(0,watches.length),borderColor:'#13151a',borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+}
+
+// ── EXPORT ────────────────────────────────────────────────
+document.getElementById('btn-exp-json').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify({watches:watches,logs:logs,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uhrenlogbuch.json';a.click();
+});
+
+document.getElementById('btn-exp-xls').addEventListener('click',function(){
+  var from=document.getElementById('exp-from').value;
+  var to=document.getElementById('exp-to').value;
+  if(!from||!to){alert('Bitte Zeitraum angeben.');return;}
+
+  // Alle Tage im Zeitraum generieren
+  var start=new Date(from+'T00:00:00');
+  var end=new Date(to+'T00:00:00');
+  if(start>end){alert('Von-Datum muss vor Bis-Datum liegen.');return;}
+
+  var allDays=[];
+  var cur=new Date(start);
+  while(cur<=end){
+    allDays.push(cur.toISOString().slice(0,10));
+    cur.setDate(cur.getDate()+1);
+  }
+
+  if(allDays.length>400){
+    if(!confirm('Der Zeitraum umfasst '+allDays.length+' Tage. Fortfahren?'))return;
+  }
+
+  // Header: Datum | Uhr1 | Uhr2 | ...
+  var header=['Datum'].concat(watches.map(function(w){return w.name+' ('+w.brand+')';}));
+  var rows=[header];
+
+  allDays.forEach(function(dateStr){
+    var row=[dateStr];
+    watches.forEach(function(w){
+      var worn=logs.some(function(l){return l.watchId===w.id&&l.date===dateStr;});
+      row.push(worn?'x':'');
+    });
+    rows.push(row);
+  });
+
+  // Summenzeile
+  var sumRow=['SUMME'];
+  watches.forEach(function(w){
+    var count=logs.filter(function(l){return l.watchId===w.id&&l.date>=from&&l.date<=to;}).length;
+    sumRow.push(count);
+  });
+  rows.push([]);
+  rows.push(sumRow);
+
+  var wb=XLSX.utils.book_new();
+  var ws=XLSX.utils.aoa_to_sheet(rows);
+
+  // Spaltenbreiten
+  ws['!cols']=[{wch:13}].concat(watches.map(function(){return {wch:22};}));
+
+  // Titelzeile fett (soweit SheetJS das unterstützt)
+  var range=XLSX.utils.decode_range(ws['!ref']);
+  for(var C=range.s.c;C<=range.e.c;C++){
+    var addr=XLSX.utils.encode_cell({r:0,c:C});
+    if(!ws[addr])continue;
+    if(!ws[addr].s)ws[addr].s={};
+    ws[addr].s.font={bold:true};
+  }
+
+  XLSX.utils.book_append_sheet(wb,ws,'Uhrenlogbuch');
+
+  var fname='uhrenlogbuch_'+from+'_'+to+'.xlsx';
+  XLSX.writeFile(wb,fname);
+});
+
+// ── IMPORT ────────────────────────────────────────────────
+document.getElementById('btn-imp-open').addEventListener('click',function(){document.getElementById('file-in').click();});
+document.getElementById('drop-zone').addEventListener('click',function(){document.getElementById('file-in').click();});
+document.getElementById('drop-zone').addEventListener('dragover',function(e){e.preventDefault();this.classList.add('drag-over');});
+document.getElementById('drop-zone').addEventListener('dragleave',function(){this.classList.remove('drag-over');});
+document.getElementById('drop-zone').addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f)processFile(f);});
+document.getElementById('file-in').addEventListener('change',function(){var f=this.files[0];if(f)processFile(f);});
+
+function parseDate(raw){
+  if(!raw&&raw!==0)return null;
+  if(raw instanceof Date){var d=new Date(raw);return isNaN(d)?null:d.toISOString().slice(0,10);}
+  var s=String(raw).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  if(/^\d{1,2}[./]\d{1,2}[./]\d{2,4}$/.test(s)){
+    var p=s.split(/[./]/);var y=p[2],m=p[1],dd=p[0];
+    if(y.length===2)y='20'+y;
+    return y+'-'+m.padStart(2,'0')+'-'+dd.padStart(2,'0');
+  }
+  var n=parseFloat(s);
+  if(!isNaN(n)&&n>40000&&n<60000)return new Date(Date.UTC(1899,11,30)+n*86400000).toISOString().slice(0,10);
+  var dt=new Date(s);return isNaN(dt)?s:dt.toISOString().slice(0,10);
+}
+function isWorn(v){
+  if(v===null||v===undefined||v==='')return false;
+  var s=String(v).trim().toLowerCase();
+  return s==='x'||s==='1'||s==='ja'||s==='yes'||s==='\u2713'||s==='true';
+}
+
+function processFile(file){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      if(raw.length<2){alert('Datei leer.');return;}
+      var watchNames=raw[0].slice(1).map(function(h){return String(h).trim();}).filter(function(h){return h;});
+      impEntries=[];
+      var skipped=0;
+      for(var r=1;r<raw.length;r++){
+        var row=raw[r];
+        if(!row[0]&&row[0]!==0){skipped++;continue;}
+        var dateStr=parseDate(row[0]);
+        for(var c=0;c<watchNames.length;c++){
+          if(isWorn(row[c+1]))impEntries.push({watchName:watchNames[c],date:dateStr});
+        }
+      }
+      var warns=impEntries.filter(function(e){return !e.date||e.date.length!==10;}).length;
+      document.getElementById('imp-stats').innerHTML=
+        '<span class="badge bok">'+impEntries.length+' Einträge</span>'+
+        '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+watchNames.length+' Uhren · '+(raw.length-1)+' Tage</span>'+
+        (warns?'<span class="badge bwarn">'+warns+' Datum unklar</span>':'')+
+        (skipped?'<span class="badge berr">'+skipped+' übersprungen</span>':'');
+      var show=impEntries.slice(0,50);
+      var h='<thead><tr><th>Datum</th><th>Uhr</th><th>Status</th></tr></thead><tbody>';
+      show.forEach(function(e){
+        var ok=e.date&&e.date.length===10;
+        h+='<tr><td>'+e.date+'</td><td>'+e.watchName+'</td><td>'+(ok?'<span class="badge bok">ok</span>':'<span class="badge bwarn">prüfen</span>')+'</td></tr>';
+      });
+      if(impEntries.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">… und '+(impEntries.length-50)+' weitere</td></tr>';
+      document.getElementById('imp-table').innerHTML=h+'</tbody>';
+      document.getElementById('imp-preview').style.display='block';
+    }catch(err){alert('Fehler: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+document.getElementById('btn-do-import').addEventListener('click',function(){
+  var mode=document.querySelector('input[name=imp-mode]:checked').value;
+  if(mode==='replace')logs=[];
+  var added=0,dupes=0,newW=0,results=[];
+  impEntries.forEach(function(e){
+    if(!e.date||e.date.length!==10){results.push({watchName:e.watchName,date:e.date,status:'skip'});return;}
+    var w=watches.find(function(w){return w.name.toLowerCase()===e.watchName.toLowerCase();});
+    if(!w){w={id:uid(),name:e.watchName,brand:''};watches.push(w);newW++;}
+    if(logs.some(function(l){return l.watchId===w.id&&l.date===e.date;})){dupes++;results.push({watchName:e.watchName,date:e.date,status:'dupe'});return;}
+    logs.unshift({date:e.date,watchId:w.id,note:'Import',id:uid()});
+    added++;results.push({watchName:e.watchName,date:e.date,status:'ok'});
+  });
+  saveAll();
+  document.getElementById('imp-done-msg').innerHTML=
+    '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> Einträge importiert'+(newW?' · <strong>'+newW+'</strong> neue Uhren':' ')+(dupes?' · <strong>'+dupes+'</strong> Duplikate übersprungen':'')+'.</div>';
+  var show=results.slice(0,25);
+  document.getElementById('imp-result-list').innerHTML=show.map(function(r){
+    return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+r.watchName+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+r.date+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
+  }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">… und '+(results.length-25)+' weitere</div>':'');
+  document.getElementById('imp-preview').style.display='none';
+  document.getElementById('imp-done').style.display='block';
+});
+
+function resetImport(){
+  impEntries=[];
+  document.getElementById('file-in').value='';
+  document.getElementById('imp-preview').style.display='none';
+  document.getElementById('imp-done').style.display='none';
+}
+document.getElementById('btn-reset-import').addEventListener('click',resetImport);
+document.getElementById('btn-reset-import2').addEventListener('click',resetImport);
+document.getElementById('btn-go-stats').addEventListener('click',function(){
+  document.querySelector('.nav button[data-tab="stats"]').click();
+});
+document.getElementById('btn-template').addEventListener('click',function(){
+  var wb=XLSX.utils.book_new();
+  var today=new Date();
+  var days=[];
+  for(var i=0;i<10;i++){var d=new Date(today);d.setDate(d.getDate()+i);days.push(d.toISOString().slice(0,10));}
+  var wn=['Rolex Submariner','Omega Speedmaster','Tudor Black Bay'];
+  var data=[['Datum'].concat(wn),[days[0],'x','',''],[days[1],'','x',''],[days[2],'','','x'],[days[3],'x','','']].concat(days.slice(4).map(function(d){return [d,'','',''];}));
+  var ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[{wch:13}].concat(wn.map(function(){return {wch:22};}));
+  XLSX.utils.book_append_sheet(wb,ws,'Uhrenlogbuch');
+  XLSX.writeFile(wb,'uhren-vorlage.xlsx');
+});
+
+// ── Init ──────────────────────────────────────────────────
+populateSel('log-watch');
+renderStart();
+</script>
+</body>
+</html>

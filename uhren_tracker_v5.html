@@ -98,10 +98,6 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Übersicht
   </button>
-  <button data-tab="heute">
-    <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 11 18 15 14"/></svg>
-    Heute
-  </button>
   <button data-tab="uhren">
     <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
     Uhren
@@ -124,17 +120,11 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
   </button>
 </div>
 
-<!-- ÜBERSICHT / STARTSEITE -->
+<!-- ÜBERSICHT & HEUTE -->
 <div id="tab-start" class="tab active">
+  <div style="font-size:20px;font-weight:700;color:var(--t1);padding:0 2px;margin-bottom:14px">Übersicht</div>
   <div id="start-reminder"></div>
   <div class="metric-grid" id="start-metrics"></div>
-  <div class="stitle" style="padding:0 2px 8px">Letzte Tage</div>
-  <div id="start-days"></div>
-</div>
-
-<!-- HEUTE -->
-<div id="tab-heute" class="tab">
-  <div id="reminder-area"></div>
   <div class="card">
     <div class="stitle">Welche Uhr trägst du heute?</div>
     <div class="fg"><label>Datum</label><input type="date" id="log-date"></div>
@@ -149,6 +139,8 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <div class="stitle">Heute eingetragen</div>
     <div id="today-list"></div>
   </div>
+  <div class="stitle" style="padding:0 2px 8px">Letzte Tage</div>
+  <div id="start-days"></div>
 </div>
 
 <!-- UHREN -->
@@ -473,17 +465,35 @@ document.getElementById('app').addEventListener('click',function(e){
   btn.classList.add('active');
   if(t==='start')renderStart();
   if(t==='stats')renderStats();
-  if(t==='heute'){populateSel('log-watch');renderReminder();}
   if(t==='log')renderLog();
   if(t==='uhren')renderWatches();
   if(t==='profil')renderProfil();
 });
 
-// ── STARTSEITE ─────────────────────────────────────────────
+// ── STARTSEITE & HEUTE ────────────────────────────────────
 function renderStart(){
   var today=todayStr();
   var ra=document.getElementById('start-reminder');
   var name=ld('wt_name','');
+
+  populateSel('log-watch');
+
+  // Today-card (always rendered regardless of state)
+  var tl=logs.filter(function(l){return l.date===today;});
+  var tc=document.getElementById('today-card');
+  if(!tl.length){tc.style.display='none';}else{
+    tc.style.display='block';
+    document.getElementById('today-list').innerHTML=tl.map(function(l){
+      var w=watches.find(function(w){return w.id===l.watchId;});
+      var gi=watches.findIndex(function(w){return w.id===l.watchId;});
+      var c=COLORS[gi>=0?gi%COLORS.length:0];
+      return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">'+
+        '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
+        '<span style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':'?')+'</span>'+
+        (l.note?'<span style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</span>':'')+
+        '</div>';
+    }).join('');
+  }
 
   // Empty-state onboarding
   if(!watches.length&&!logs.length){
@@ -493,19 +503,23 @@ function renderStart(){
       '<div style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:10px">'+(name?'Willkommen, '+esc(name)+'!':'Willkommen beim Uhrentracker!')+'</div>'+
       '<div style="font-size:13px;color:var(--t2);line-height:2">'+
       '<span style="color:var(--accent);font-weight:700">1.</span> Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.<br>'+
-      '<span style="color:var(--accent);font-weight:700">2.</span> Gehe zu <strong style="color:var(--t1)">Heute</strong> und trage täglich ein, welche Uhr du trägst.<br>'+
+      '<span style="color:var(--accent);font-weight:700">2.</span> Wähle oben eine Uhr aus und trage sie ein.<br>'+
       '<span style="color:var(--accent);font-weight:700">3.</span> Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'+
       '</div></div>';
     document.getElementById('start-days').innerHTML='';
     return;
   }
 
-  // Reminder
-  if(!logs.some(function(l){return l.date===today;})){
-    ra.innerHTML='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'+(name?esc(name)+': Noch':'Noch')+' kein Eintrag für heute – <button data-tab="heute" class="btn btn-p" style="padding:3px 10px;font-size:12px;margin-left:4px">Jetzt eintragen</button></div>';
-  } else {
-    ra.innerHTML=name?'<div style="font-size:13px;color:var(--t3);margin-bottom:8px">Guten Tag, <strong style="color:var(--t2)">'+esc(name)+'</strong>.</div>':'';
-  }
+  // Reminders
+  var yest=new Date();yest.setDate(yest.getDate()-1);
+  var ys=yest.toISOString().slice(0,10);
+  var h='';
+  if(!logs.some(function(l){return l.date===today;}))
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'+(name?esc(name)+': Noch':'Noch')+' kein Eintrag für heute.</div>';
+  if(logs.length>0&&!logs.some(function(l){return l.date===ys;}))
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gestern ('+ys+') fehlt noch ein Eintrag.</div>';
+  if(!h&&name)h='<div style="font-size:13px;color:var(--t3);margin-bottom:8px">Guten Tag, <strong style="color:var(--t2)">'+esc(name)+'</strong>.</div>';
+  ra.innerHTML=h;
 
   // Metriken
   var m=getMetrics();
@@ -515,20 +529,11 @@ function renderStart(){
     '<div class="metric"><div class="ml">Streak</div><div class="mv">'+m.streak+'</div><div class="ms">Tage am Stück</div></div>'+
     '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>';
 
-  // Letzte 5 Tage mit Einträgen
-  var allDates=Array.from(new Set(logs.map(function(l){return l.date;}))).sort().reverse().slice(0,5);
-
-  // Fülle fehlende Tage auf bis zu heute
+  // Letzte 5 Tage
   var filled=[];
-  for(var i=0;i<5;i++){
-    var d=new Date();d.setDate(d.getDate()-i);
-    filled.push(d.toISOString().slice(0,10));
-  }
-  // Merge: zeige die letzten 5 Tage (mit oder ohne Eintrag)
-  var showDates=filled;
-
+  for(var i=0;i<5;i++){var d=new Date();d.setDate(d.getDate()-i);filled.push(d.toISOString().slice(0,10));}
   var html='';
-  showDates.forEach(function(dateStr){
+  filled.forEach(function(dateStr){
     var dayLogs=logs.filter(function(l){return l.date===dateStr;}).sort(function(a,b){return a.date.localeCompare(b.date);});
     var todayMark=isToday(dateStr)?'<span class="day-today">Heute</span>':'';
     html+='<div class="day-block">';
@@ -554,33 +559,6 @@ function renderStart(){
   document.getElementById('start-days').innerHTML=html;
 }
 
-// ── HEUTE ─────────────────────────────────────────────────
-function renderReminder(){
-  var today=todayStr();
-  var yest=new Date();yest.setDate(yest.getDate()-1);
-  var ys=yest.toISOString().slice(0,10);
-  var h='';
-  if(!logs.some(function(l){return l.date===today;}))
-    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Noch kein Eintrag für heute.</div>';
-  if(logs.length>0&&!logs.some(function(l){return l.date===ys;}))
-    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gestern ('+ys+') fehlt noch ein Eintrag.</div>';
-  document.getElementById('reminder-area').innerHTML=h;
-  var tl=logs.filter(function(l){return l.date===today;});
-  var tc=document.getElementById('today-card');
-  if(!tl.length){tc.style.display='none';return;}
-  tc.style.display='block';
-  document.getElementById('today-list').innerHTML=tl.map(function(l){
-    var w=watches.find(function(w){return w.id===l.watchId;});
-    var gi=watches.findIndex(function(w){return w.id===l.watchId;});
-    var c=COLORS[gi%COLORS.length];
-    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
-      '<span style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':'?')+'</span>'+
-      (l.note?'<span style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</span>':'')+
-      '</div>';
-  }).join('');
-}
-
 document.getElementById('btn-add-log').addEventListener('click',function(){
   var date=document.getElementById('log-date').value;
   var watchId=document.getElementById('log-watch').value;
@@ -589,7 +567,7 @@ document.getElementById('btn-add-log').addEventListener('click',function(){
   logs.unshift({date:date,watchId:watchId,note:note,id:uid()});
   saveAll();
   document.getElementById('log-note').value='';
-  renderReminder();
+  renderStart();
 });
 
 // ── UHREN ─────────────────────────────────────────────────

@@ -118,6 +118,10 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Export / Import
   </button>
+  <button data-tab="profil">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    Profil
+  </button>
 </div>
 
 <!-- ÜBERSICHT / STARTSEITE -->
@@ -233,11 +237,11 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 
   <!-- IMPORT -->
   <div class="card">
-    <div class="stitle">Excel importieren</div>
+    <div class="stitle">Datei importieren</div>
     <div class="drop-zone" id="drop-zone">
       <svg style="width:32px;height:32px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 10px" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      <div style="font-size:14px;font-weight:600;color:var(--t1)">Excel-Datei hier ablegen</div>
-      <div style="font-size:12px;color:var(--t3);margin-top:4px">oder klicken zum Auswählen (.xlsx, .xls, .csv)</div>
+      <div style="font-size:14px;font-weight:600;color:var(--t1)">Datei hier ablegen</div>
+      <div style="font-size:12px;color:var(--t3);margin-top:4px">oder klicken zum Auswählen (.xlsx, .xls, .csv, .json)</div>
     </div>
     <input type="file" id="file-in" accept=".xlsx,.xls,.csv">
     <p style="font-size:12px;color:var(--t3);margin-top:10px;line-height:1.7">
@@ -304,6 +308,30 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
   </div>
 </div>
 
+<!-- PROFIL -->
+<div id="tab-profil" class="tab">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:13px;margin-bottom:12px">
+      <div style="width:46px;height:46px;border-radius:12px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg style="width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:700;color:var(--t1)">Uhrentracker</div>
+        <div style="font-size:12px;color:var(--t3)">Dein persönliches Uhrenlogbuch</div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--t2);line-height:1.7">Halte täglich fest, welche Uhr du trägst. Entdecke Muster in deiner Sammlung, sieh deinen Streak wachsen und exportiere alles als Excel oder JSON.</p>
+  </div>
+  <div class="card">
+    <div class="stitle">Dein Name</div>
+    <div class="fg" style="margin-bottom:0"><input type="text" id="profil-name" placeholder="Name eingeben …" maxlength="60"></div>
+  </div>
+  <div class="card">
+    <div class="stitle">Deine Sammlung</div>
+    <div class="metric-grid" id="profil-metrics"></div>
+  </div>
+</div>
+
 <!-- MODALS -->
 <div class="modal-wrap" id="modal-watch">
   <div class="modal">
@@ -341,6 +369,31 @@ function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
 function saveAll(){sv('wt_w',watches);sv('wt_l',logs);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+function calcStreak(){
+  var today=todayStr();
+  var d=new Date(today+'T00:00:00');
+  if(!logs.some(function(l){return l.date===today;}))d.setDate(d.getDate()-1);
+  var streak=0;
+  while(true){
+    var ds=d.toISOString().slice(0,10);
+    if(!logs.some(function(l){return l.date===ds;}))break;
+    streak++;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+
+function getMetrics(){
+  var year=new Date().getFullYear();
+  var yLogs=logs.filter(function(l){return l.date.indexOf(year)===0;});
+  var days=new Set(logs.map(function(l){return l.date;})).size;
+  var fav=watches.reduce(function(a,w){
+    var c=logs.filter(function(l){return l.watchId===w.id;}).length;
+    return c>a.c?{n:w.name,c:c}:a;
+  },{n:'—',c:0});
+  return{year:year,yLogs:yLogs,days:days,fav:fav,streak:calcStreak()};
+}
 
 var watches=ld('wt_w',[]);
 var logs=ld('wt_l',[]);
@@ -410,7 +463,7 @@ function brandBadge(brand,idx){
 }
 
 // ── Tab navigation ─────────────────────────────────────────
-document.querySelector('.nav').addEventListener('click',function(e){
+document.getElementById('app').addEventListener('click',function(e){
   var btn=e.target.closest('button[data-tab]');
   if(!btn)return;
   var t=btn.dataset.tab;
@@ -423,32 +476,44 @@ document.querySelector('.nav').addEventListener('click',function(e){
   if(t==='heute'){populateSel('log-watch');renderReminder();}
   if(t==='log')renderLog();
   if(t==='uhren')renderWatches();
+  if(t==='profil')renderProfil();
 });
 
 // ── STARTSEITE ─────────────────────────────────────────────
 function renderStart(){
-  // Reminder
   var today=todayStr();
   var ra=document.getElementById('start-reminder');
-  if(!logs.some(function(l){return l.date===today;})){
-    ra.innerHTML='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Noch kein Eintrag für heute – <button data-tab="heute" class="btn btn-p" style="padding:3px 10px;font-size:12px;margin-left:4px">Jetzt eintragen</button></div>';
-  } else {
+  var name=ld('wt_name','');
+
+  // Empty-state onboarding
+  if(!watches.length&&!logs.length){
     ra.innerHTML='';
+    document.getElementById('start-metrics').innerHTML=
+      '<div class="metric" style="grid-column:1/-1;background:rgba(79,142,247,.06);border-color:rgba(79,142,247,.2)">'+
+      '<div style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:10px">'+(name?'Willkommen, '+esc(name)+'!':'Willkommen beim Uhrentracker!')+'</div>'+
+      '<div style="font-size:13px;color:var(--t2);line-height:2">'+
+      '<span style="color:var(--accent);font-weight:700">1.</span> Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.<br>'+
+      '<span style="color:var(--accent);font-weight:700">2.</span> Gehe zu <strong style="color:var(--t1)">Heute</strong> und trage täglich ein, welche Uhr du trägst.<br>'+
+      '<span style="color:var(--accent);font-weight:700">3.</span> Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'+
+      '</div></div>';
+    document.getElementById('start-days').innerHTML='';
+    return;
+  }
+
+  // Reminder
+  if(!logs.some(function(l){return l.date===today;})){
+    ra.innerHTML='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'+(name?esc(name)+': Noch':'Noch')+' kein Eintrag für heute – <button data-tab="heute" class="btn btn-p" style="padding:3px 10px;font-size:12px;margin-left:4px">Jetzt eintragen</button></div>';
+  } else {
+    ra.innerHTML=name?'<div style="font-size:13px;color:var(--t3);margin-bottom:8px">Guten Tag, <strong style="color:var(--t2)">'+esc(name)+'</strong>.</div>':'';
   }
 
   // Metriken
-  var year=new Date().getFullYear();
-  var yLogs=logs.filter(function(l){return l.date.indexOf(year)===0;});
-  var days=new Set(logs.map(function(l){return l.date;})).size;
-  var fav=watches.reduce(function(a,w){
-    var c=logs.filter(function(l){return l.watchId===w.id;}).length;
-    return c>a.c?{n:w.name,c:c}:a;
-  },{n:'—',c:0});
+  var m=getMetrics();
   document.getElementById('start-metrics').innerHTML=
     '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
-    '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+m.days+'</div></div>'+
+    '<div class="metric"><div class="ml">Streak</div><div class="mv">'+m.streak+'</div><div class="ms">Tage am Stück</div></div>'+
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>';
 
   // Letzte 5 Tage mit Einträgen
   var allDates=Array.from(new Set(logs.map(function(l){return l.date;}))).sort().reverse().slice(0,5);
@@ -591,7 +656,6 @@ function renderLog(){
   if(!logs.length){el.innerHTML='<div class="empty">Noch keine Einträge vorhanden.</div>';return;}
   var sorted=logs.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   el.innerHTML=sorted.map(function(l){
-    var oi=logs.indexOf(l);
     var w=watches.find(function(w){return w.id===l.watchId;});
     var gi=watches.findIndex(function(w){return w.id===l.watchId;});
     var c=COLORS[gi%COLORS.length];
@@ -603,8 +667,8 @@ function renderLog(){
       '</div></div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
       '<span style="font-size:12px;color:var(--t3)">'+l.date+'</span>'+
-      '<button class="btn" style="padding:5px 8px" data-action="edit-log" data-idx="'+oi+'"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
-      '<button class="btn btn-d" style="padding:5px 8px" data-action="delete-log" data-idx="'+oi+'"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
+      '<button class="btn" style="padding:5px 8px" data-action="edit-log" data-id="'+l.id+'"><svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
+      '<button class="btn btn-d" style="padding:5px 8px" data-action="delete-log" data-id="'+l.id+'"><svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
       '</div></div>';
   }).join('');
 }
@@ -613,12 +677,14 @@ document.getElementById('log-list').addEventListener('click',function(e){
   var btn=e.target.closest('button[data-action]');
   if(!btn)return;
   var action=btn.dataset.action;
-  var idx=parseInt(btn.dataset.idx,10);
+  var id=btn.dataset.id;
+  var idx=logs.findIndex(function(l){return l.id===id;});
+  if(idx===-1)return;
   if(action==='delete-log'){
     if(!confirm('Diesen Eintrag löschen?'))return;
     logs.splice(idx,1);saveAll();renderLog();
   } else if(action==='edit-log'){
-    document.getElementById('edit-li').value=idx;
+    document.getElementById('edit-li').value=id;
     document.getElementById('edit-ldate').value=logs[idx].date;
     document.getElementById('edit-lnote').value=logs[idx].note||'';
     populateSel('edit-lwatch',logs[idx].watchId);
@@ -627,7 +693,9 @@ document.getElementById('log-list').addEventListener('click',function(e){
 });
 
 document.getElementById('btn-save-log').addEventListener('click',function(){
-  var i=parseInt(document.getElementById('edit-li').value,10);
+  var id=document.getElementById('edit-li').value;
+  var i=logs.findIndex(function(l){return l.id===id;});
+  if(i===-1)return;
   logs[i].date=document.getElementById('edit-ldate').value;
   logs[i].watchId=document.getElementById('edit-lwatch').value;
   logs[i].note=document.getElementById('edit-lnote').value.trim();
@@ -637,15 +705,12 @@ document.getElementById('btn-cancel-log').addEventListener('click',function(){do
 
 // ── STATISTIKEN ───────────────────────────────────────────
 function renderStats(){
-  var year=new Date().getFullYear();
-  var yLogs=logs.filter(function(l){return l.date.indexOf(year)===0;});
-  var days=new Set(logs.map(function(l){return l.date;})).size;
-  var fav=watches.reduce(function(a,w){var c=logs.filter(function(l){return l.watchId===w.id;}).length;return c>a.c?{n:w.name,c:c}:a;},{n:'—',c:0});
+  var m=getMetrics();
   document.getElementById('metric-grid').innerHTML=
     '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
-    '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:14px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+m.days+'</div></div>'+
+    '<div class="metric"><div class="ml">Einträge '+m.year+'</div><div class="mv">'+m.yLogs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:14px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>';
   var counts=watches.map(function(w){return logs.filter(function(l){return l.watchId===w.id;}).length;});
   var labels=watches.map(function(w){return w.name;});
   var bh=Math.max(160,watches.length*44+60);
@@ -920,6 +985,39 @@ document.getElementById('btn-template').addEventListener('click',function(){
   XLSX.utils.book_append_sheet(wb,ws,'Uhrenlogbuch');
   XLSX.writeFile(wb,'uhren-vorlage.xlsx');
 });
+
+// ── PROFIL ────────────────────────────────────────────────
+function renderProfil(){
+  var name=ld('wt_name','');
+  var inp=document.getElementById('profil-name');
+  inp.value=name;
+  if(!inp._listening){
+    inp._listening=true;
+    inp.addEventListener('input',function(){
+      sv('wt_name',this.value.trim());
+    });
+  }
+  var el=document.getElementById('profil-metrics');
+  if(!watches.length&&!logs.length){
+    el.innerHTML=
+      '<div style="grid-column:1/-1;padding:8px 0">'+
+      '<div style="font-size:13px;color:var(--t2);line-height:2">'+
+      '<span style="color:var(--accent);font-weight:700">1.</span> Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.<br>'+
+      '<span style="color:var(--accent);font-weight:700">2.</span> Gehe zu <strong style="color:var(--t1)">Heute</strong> und trage täglich ein, welche Uhr du trägst.<br>'+
+      '<span style="color:var(--accent);font-weight:700">3.</span> Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'+
+      '</div></div>';
+    return;
+  }
+  var m=getMetrics();
+  var firstDate=logs.length?logs.map(function(l){return l.date;}).sort()[0]:null;
+  el.innerHTML=
+    '<div class="metric"><div class="ml">Uhren</div><div class="mv">'+watches.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+m.days+'</div></div>'+
+    '<div class="metric"><div class="ml">Aktueller Streak</div><div class="mv">'+m.streak+'</div><div class="ms">Tage am Stück</div></div>'+
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>'+
+    (firstDate?'<div class="metric"><div class="ml">Dabei seit</div><div class="mv" style="font-size:14px">'+firstDate+'</div></div>':'');
+}
 
 // ── Init ──────────────────────────────────────────────────
 populateSel('log-watch');

@@ -85,6 +85,10 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 .export-opt:hover{border-color:var(--border2)}
 .export-opt .eo-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:3px}
 .export-opt .eo-desc{font-size:11px;color:var(--t3);line-height:1.5}
+.imp-mode-opt{display:block;border:1px solid var(--border2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .15s;background:var(--bg2)}
+.imp-mode-opt input{display:none}
+.imp-mode-opt:hover{border-color:var(--accent);color:var(--t1)}
+.imp-mode-sel{border-color:var(--accent)!important;background:rgba(79,142,247,.08)!important;color:var(--t1)!important}
 </style>
 </head>
 <body>
@@ -264,9 +268,9 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     </div>
     <div class="card">
       <div class="stitle">Import-Optionen</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;font-size:13px;color:var(--t2)">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="imp-mode" value="merge" checked> Zusammenführen (bestehende Einträge behalten)</label>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="radio" name="imp-mode" value="replace"> Ersetzen (alle Logs löschen und neu aufbauen)</label>
+      <div style="display:flex;gap:6px;margin-bottom:14px">
+        <label class="imp-mode-opt imp-mode-sel" style="flex:1"><input type="radio" name="imp-mode" value="merge" checked><div style="font-weight:600;margin-bottom:2px">Zusammenführen</div><div>Bestehende Einträge behalten</div></label>
+        <label class="imp-mode-opt" style="flex:1"><input type="radio" name="imp-mode" value="replace"><div style="font-weight:600;margin-bottom:2px">Ersetzen</div><div>Alle Logs löschen &amp; neu aufbauen</div></label>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-s" id="btn-do-import">
@@ -336,10 +340,12 @@ function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}cat
 function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
 function saveAll(){sv('wt_w',watches);sv('wt_l',logs);}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 var watches=ld('wt_w',[]);
 var logs=ld('wt_l',[]);
 var impEntries=[];
+var impJsonData=null;
 var barC,lineC,pieC;
 
 var COLORS=['#4f8ef7','#2ecc8a','#f87171','#fbbf24','#a78bfa','#34d399','#f472b6','#67e8f9','#fb923c','#93c5fd'];
@@ -400,7 +406,7 @@ function brandBadge(brand,idx){
   ];
   var s=match||(fallbacks[idx%fallbacks.length]);
   var abbr=match?match.abbr:(brand.slice(0,3).toUpperCase()||'—');
-  return '<div class="brand-badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.border+'">'+abbr+'</div>';
+  return '<div class="brand-badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.border+'">'+esc(abbr)+'</div>';
 }
 
 // ── Tab navigation ─────────────────────────────────────────
@@ -442,7 +448,7 @@ function renderStart(){
     '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
     '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
     '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+fav.n+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
 
   // Letzte 5 Tage mit Einträgen
   var allDates=Array.from(new Set(logs.map(function(l){return l.date;}))).sort().reverse().slice(0,5);
@@ -472,8 +478,8 @@ function renderStart(){
         html+='<div class="day-watch-row">';
         html+='<div class="day-dot" style="background:'+c+'"></div>';
         html+='<div style="flex:1">';
-        html+='<div style="font-size:13px;font-weight:600;color:var(--t1)">'+(w?w.name+' <span style="font-weight:400;color:var(--t3)">'+w.brand+'</span>':'Gelöschte Uhr')+'</div>';
-        if(l.note)html+='<div style="font-size:11px;color:var(--t3)">'+l.note+'</div>';
+        html+='<div style="font-size:13px;font-weight:600;color:var(--t1)">'+(w?esc(w.name)+' <span style="font-weight:400;color:var(--t3)">'+esc(w.brand)+'</span>':'Gelöschte Uhr')+'</div>';
+        if(l.note)html+='<div style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</div>';
         html+='</div>';
         html+='</div>';
       });
@@ -504,8 +510,8 @@ function renderReminder(){
     var c=COLORS[gi%COLORS.length];
     return '<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)">'+
       '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
-      '<span style="font-weight:600">'+(w?w.name+' ('+w.brand+')':'?')+'</span>'+
-      (l.note?'<span style="font-size:11px;color:var(--t3)">'+l.note+'</span>':'')+
+      '<span style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':'?')+'</span>'+
+      (l.note?'<span style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</span>':'')+
       '</div>';
   }).join('');
 }
@@ -530,8 +536,8 @@ function renderWatches(){
     var count=logs.filter(function(l){return l.watchId===w.id;}).length;
     return '<div class="watch-row">'+
       '<div style="display:flex;align-items:center">'+brandBadge(w.brand,i)+
-      '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+w.name+'</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+w.brand+'&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen</div></div></div>'+
+      '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+esc(w.name)+'</div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+esc(w.brand)+'&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen</div></div></div>'+
       '<div style="display:flex;gap:6px">'+
       '<button class="btn" style="padding:6px 10px" data-action="edit-watch" data-idx="'+i+'" aria-label="Bearbeiten">'+
       '<svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
@@ -563,7 +569,7 @@ document.getElementById('watch-list').addEventListener('click',function(e){
     document.getElementById('edit-wbrand').value=watches[idx].brand;
     document.getElementById('modal-watch').classList.add('open');
   } else if(action==='delete-watch'){
-    if(!confirm('Uhr "'+watches[idx].name+'" und alle zugehörigen Einträge löschen?'))return;
+    if(!confirm('Uhr "'+watches[idx].name.replace(/\n/g,' ')+'" und alle zugehörigen Einträge löschen?'))return;
     var wid=watches[idx].id;
     watches.splice(idx,1);
     logs=logs.filter(function(l){return l.watchId!==wid;});
@@ -592,8 +598,8 @@ function renderLog(){
     return '<div class="log-row">'+
       '<div style="display:flex;align-items:center;gap:9px">'+
       '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
-      '<div><div style="font-weight:600">'+(w?w.name+' ('+w.brand+')':'Gelöschte Uhr')+'</div>'+
-      (l.note?'<div style="font-size:11px;color:var(--t3)">'+l.note+'</div>':'')+
+      '<div><div style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':'Gelöschte Uhr')+'</div>'+
+      (l.note?'<div style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</div>':'')+
       '</div></div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
       '<span style="font-size:12px;color:var(--t3)">'+l.date+'</span>'+
@@ -639,7 +645,7 @@ function renderStats(){
     '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
     '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+days+'</div></div>'+
     '<div class="metric"><div class="ml">Einträge '+year+'</div><div class="mv">'+yLogs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:14px">'+fav.n+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:14px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
   var counts=watches.map(function(w){return logs.filter(function(l){return l.watchId===w.id;}).length;});
   var labels=watches.map(function(w){return w.name;});
   var bh=Math.max(160,watches.length*44+60);
@@ -666,7 +672,7 @@ function renderStats(){
   });
   document.getElementById('pie-legend').innerHTML=watches.map(function(w,i){
     var c=counts[i],pct=logs.length?Math.round(c/logs.length*100):0;
-    return '<span style="display:flex;align-items:center;gap:5px;color:var(--t2)"><span style="width:9px;height:9px;border-radius:2px;background:'+COLORS[i%COLORS.length]+'"></span>'+w.name+' '+pct+'%</span>';
+    return '<span style="display:flex;align-items:center;gap:5px;color:var(--t2)"><span style="width:9px;height:9px;border-radius:2px;background:'+COLORS[i%COLORS.length]+'"></span>'+esc(w.name)+' '+pct+'%</span>';
   }).join('');
   if(pieC)pieC.destroy();
   pieC=new Chart(document.getElementById('pieChart'),{
@@ -753,6 +759,7 @@ document.getElementById('drop-zone').addEventListener('dragover',function(e){e.p
 document.getElementById('drop-zone').addEventListener('dragleave',function(){this.classList.remove('drag-over');});
 document.getElementById('drop-zone').addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f)processFile(f);});
 document.getElementById('file-in').addEventListener('change',function(){var f=this.files[0];if(f)processFile(f);});
+document.querySelectorAll('.imp-mode-opt').forEach(function(el){el.addEventListener('click',function(){document.querySelectorAll('.imp-mode-opt').forEach(function(x){x.classList.remove('imp-mode-sel');});el.classList.add('imp-mode-sel');});});
 
 function parseDate(raw){
   if(!raw&&raw!==0)return null;
@@ -775,6 +782,31 @@ function isWorn(v){
 }
 
 function processFile(file){
+  if(file.size>5*1024*1024){alert('Datei zu groß (max. 5 MB).');return;}
+  if(file.name.toLowerCase().endsWith('.json')){
+    var jr=new FileReader();
+    jr.onload=function(e){
+      try{
+        var data=JSON.parse(e.target.result);
+        if(!Array.isArray(data.watches)||!Array.isArray(data.logs)){alert('Ungültiges JSON-Format.');return;}
+        impJsonData=data;impEntries=[];
+        document.getElementById('imp-stats').innerHTML=
+          '<span class="badge bok">'+data.logs.length+' Einträge</span>'+
+          '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+data.watches.length+' Uhren</span>';
+        var show=data.logs.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,50);
+        var h='<thead><tr><th>Datum</th><th>Uhr</th><th>Status</th></tr></thead><tbody>';
+        show.forEach(function(l){
+          var w=data.watches.find(function(w){return w.id===l.watchId;});
+          h+='<tr><td>'+esc(l.date)+'</td><td>'+esc(w?w.name:'?')+'</td><td><span class="badge bok">ok</span></td></tr>';
+        });
+        if(data.logs.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">… und '+(data.logs.length-50)+' weitere</td></tr>';
+        document.getElementById('imp-table').innerHTML=h+'</tbody>';
+        document.getElementById('imp-preview').style.display='block';
+      }catch(err){alert('Fehler: '+err.message);}
+    };
+    jr.readAsText(file);
+    return;
+  }
   var reader=new FileReader();
   reader.onload=function(e){
     try{
@@ -803,7 +835,7 @@ function processFile(file){
       var h='<thead><tr><th>Datum</th><th>Uhr</th><th>Status</th></tr></thead><tbody>';
       show.forEach(function(e){
         var ok=e.date&&e.date.length===10;
-        h+='<tr><td>'+e.date+'</td><td>'+e.watchName+'</td><td>'+(ok?'<span class="badge bok">ok</span>':'<span class="badge bwarn">prüfen</span>')+'</td></tr>';
+        h+='<tr><td>'+esc(e.date)+'</td><td>'+esc(e.watchName)+'</td><td>'+(ok?'<span class="badge bok">ok</span>':'<span class="badge bwarn">prüfen</span>')+'</td></tr>';
       });
       if(impEntries.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">… und '+(impEntries.length-50)+' weitere</td></tr>';
       document.getElementById('imp-table').innerHTML=h+'</tbody>';
@@ -815,6 +847,35 @@ function processFile(file){
 
 document.getElementById('btn-do-import').addEventListener('click',function(){
   var mode=document.querySelector('input[name=imp-mode]:checked').value;
+  if(impJsonData){
+    if(mode==='replace'){logs=[];watches=[];}
+    var added=0,dupes=0,newW=0,results=[];
+    impJsonData.watches.forEach(function(sw){
+      if(!watches.find(function(w){return w.name.toLowerCase()===sw.name.toLowerCase();})){
+        watches.push({id:uid(),name:sw.name,brand:sw.brand||''});newW++;
+      }
+    });
+    impJsonData.logs.forEach(function(l){
+      if(!l.date||l.date.length!==10){results.push({watchName:'?',date:l.date||'',status:'skip'});return;}
+      var sw=impJsonData.watches.find(function(w){return w.id===l.watchId;});
+      if(!sw){results.push({watchName:'?',date:l.date,status:'skip'});return;}
+      var w=watches.find(function(w){return w.name.toLowerCase()===sw.name.toLowerCase();});
+      if(!w){w={id:uid(),name:sw.name,brand:sw.brand||''};watches.push(w);newW++;}
+      if(logs.some(function(x){return x.watchId===w.id&&x.date===l.date;})){dupes++;results.push({watchName:sw.name,date:l.date,status:'dupe'});return;}
+      logs.unshift({date:l.date,watchId:w.id,note:l.note||'',id:uid()});
+      added++;results.push({watchName:sw.name,date:l.date,status:'ok'});
+    });
+    saveAll();
+    document.getElementById('imp-done-msg').innerHTML=
+      '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> Einträge importiert'+(newW?' · <strong>'+newW+'</strong> neue Uhren':' ')+(dupes?' · <strong>'+dupes+'</strong> Duplikate übersprungen':'')+'.</div>';
+    var show=results.slice(0,25);
+    document.getElementById('imp-result-list').innerHTML=show.map(function(r){
+      return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
+    }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">… und '+(results.length-25)+' weitere</div>':'');
+    document.getElementById('imp-preview').style.display='none';
+    document.getElementById('imp-done').style.display='block';
+    return;
+  }
   if(mode==='replace')logs=[];
   var added=0,dupes=0,newW=0,results=[];
   impEntries.forEach(function(e){
@@ -830,14 +891,14 @@ document.getElementById('btn-do-import').addEventListener('click',function(){
     '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> Einträge importiert'+(newW?' · <strong>'+newW+'</strong> neue Uhren':' ')+(dupes?' · <strong>'+dupes+'</strong> Duplikate übersprungen':'')+'.</div>';
   var show=results.slice(0,25);
   document.getElementById('imp-result-list').innerHTML=show.map(function(r){
-    return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+r.watchName+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+r.date+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
+    return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
   }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">… und '+(results.length-25)+' weitere</div>':'');
   document.getElementById('imp-preview').style.display='none';
   document.getElementById('imp-done').style.display='block';
 });
 
 function resetImport(){
-  impEntries=[];
+  impEntries=[];impJsonData=null;
   document.getElementById('file-in').value='';
   document.getElementById('imp-preview').style.display='none';
   document.getElementById('imp-done').style.display='none';

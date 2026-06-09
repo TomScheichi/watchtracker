@@ -157,6 +157,11 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
       <div class="fg" style="margin-bottom:0"><label>Name / Modell</label><input type="text" id="w-name" placeholder="Submariner Date"></div>
       <div class="fg" style="margin-bottom:0"><label>Marke</label><input type="text" id="w-brand" placeholder="Rolex"></div>
     </div>
+    <div class="frow" style="margin-bottom:10px">
+      <div class="fg" style="margin-bottom:0"><label>Referenznummer (optional)</label><input type="text" id="w-ref" placeholder="126610LN"></div>
+      <div class="fg" style="margin-bottom:0"><label>Kaufpreis € (optional)</label><input type="number" id="w-price" placeholder="12000" min="0" step="1"></div>
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>Kaufdatum (optional)</label><input type="date" id="w-pdate"></div>
     <button class="btn btn-p" id="btn-add-watch">
       <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Hinzufügen
@@ -196,6 +201,15 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <div class="stitle">Verteilung</div>
     <div id="pie-legend" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px"></div>
     <div style="position:relative;width:100%;height:180px"><canvas id="pieChart"></canvas></div>
+  </div>
+  <div class="card" id="price-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div class="stitle" style="margin-bottom:0">Preisentwicklung</div>
+      <select id="price-watch-sel" style="width:auto;min-width:150px;font-size:12px;padding:5px 28px 5px 10px"></select>
+    </div>
+    <div class="metric-grid" id="price-metrics" style="margin-bottom:10px"></div>
+    <div id="price-chart-outer" style="position:relative;width:100%;height:200px"><canvas id="priceChart"></canvas></div>
+    <div id="price-empty" style="display:none" class="empty">Kaufpreis bei einer Uhr hinterlegen oder über € Preiseinträge erfassen.</div>
   </div>
 </div>
 
@@ -345,6 +359,11 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <input type="hidden" id="edit-wi">
     <div class="fg"><label>Name / Modell</label><input type="text" id="edit-wname"></div>
     <div class="fg"><label>Marke</label><input type="text" id="edit-wbrand"></div>
+    <div class="fg"><label>Referenznummer (optional)</label><input type="text" id="edit-wref" placeholder="126610LN"></div>
+    <div class="frow">
+      <div class="fg"><label>Kaufdatum (optional)</label><input type="date" id="edit-wpdate"></div>
+      <div class="fg"><label>Kaufpreis € (optional)</label><input type="number" id="edit-wprice" placeholder="12000" min="0" step="1"></div>
+    </div>
     <div class="mfoot">
       <button class="btn" id="btn-cancel-watch">Abbrechen</button>
       <button class="btn btn-p" id="btn-save-watch">Speichern</button>
@@ -361,6 +380,26 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <div class="mfoot">
       <button class="btn" id="btn-cancel-log">Abbrechen</button>
       <button class="btn btn-p" id="btn-save-log">Speichern</button>
+    </div>
+  </div>
+</div>
+<div class="modal-wrap" id="modal-price">
+  <div class="modal" style="width:320px">
+    <h3 id="modal-price-title">Preishistorie</h3>
+    <input type="hidden" id="price-wi">
+    <div id="price-history-list" style="max-height:190px;overflow-y:auto;margin-bottom:12px;border:1px solid var(--border);border-radius:var(--rs)"></div>
+    <div class="stitle">Neuen Preis eintragen</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button class="pill active" data-ptype="used" style="flex:1;justify-content:center">Gebraucht</button>
+      <button class="pill" data-ptype="new" style="flex:1;justify-content:center">Neu</button>
+    </div>
+    <div class="frow" style="margin-bottom:0">
+      <div class="fg" style="margin-bottom:8px"><label>Datum</label><input type="date" id="new-price-date"></div>
+      <div class="fg" style="margin-bottom:8px"><label>Preis €</label><input type="number" id="new-price-val" placeholder="14000" min="0" step="1"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" id="btn-cancel-price">Schließen</button>
+      <button class="btn btn-p" id="btn-add-price-entry">Hinzufügen</button>
     </div>
   </div>
 </div>
@@ -405,7 +444,7 @@ var watches=ld('wt_w',[]).filter(function(w){return w&&w.id&&typeof w.name==='st
 var logs=ld('wt_l',[]).filter(function(l){return l&&typeof l.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(l.date)&&l.watchId;});
 var impEntries=[];
 var impJsonData=null;
-var barC,lineC,pieC;
+var barC,lineC,pieC,priceC;
 
 var COLORS=['#4f8ef7','#2ecc8a','#f87171','#fbbf24','#a78bfa','#34d399','#f472b6','#67e8f9','#fb923c','#93c5fd'];
 
@@ -591,11 +630,29 @@ function renderWatches(){
   if(!watches.length){el.innerHTML='<div class="empty">Noch keine Uhren erfasst.</div>';return;}
   el.innerHTML=watches.map(function(w,i){
     var count=logs.filter(function(l){return l.watchId===w.id;}).length;
+    var usedPts=buildPricePoints(w,'used'),newPts=buildPricePoints(w,'new');
+    var priceInfo='';
+    if(usedPts.length){
+      var lu=usedPts[usedPts.length-1],fu=usedPts[0];
+      var cu=fu.price>0?((lu.price-fu.price)/fu.price*100):0;
+      var ccu=cu>=0?'var(--green)':'var(--red)';
+      priceInfo+='&nbsp;·&nbsp;<span style="color:var(--t3)">G</span>&nbsp;€'+Math.round(lu.price).toLocaleString('de-DE')+
+        (usedPts.length>1?' <span style="color:'+ccu+'">'+(cu>=0?'+':'')+cu.toFixed(0)+'%</span>':'');
+    }
+    if(newPts.length){
+      var ln=newPts[newPts.length-1],fn=newPts[0];
+      var cn=fn.price>0?((ln.price-fn.price)/fn.price*100):0;
+      var ccn=cn>=0?'var(--green)':'var(--red)';
+      priceInfo+='&nbsp;·&nbsp;<span style="color:var(--amber)">N</span>&nbsp;€'+Math.round(ln.price).toLocaleString('de-DE')+
+        (newPts.length>1?' <span style="color:'+ccn+'">'+(cn>=0?'+':'')+cn.toFixed(0)+'%</span>':'');
+    }
     return '<div class="watch-row">'+
       '<div style="display:flex;align-items:center">'+brandBadge(w.brand,i)+
       '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+esc(w.name)+'</div>'+
-      '<div style="font-size:11px;color:var(--t3)">'+esc(w.brand)+'&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen</div></div></div>'+
+      '<div style="font-size:11px;color:var(--t3)">'+esc(w.brand)+(w.ref?'&nbsp;·&nbsp;Ref.&nbsp;'+esc(w.ref):'')+
+      '&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen'+priceInfo+'</div></div></div>'+
       '<div style="display:flex;gap:6px">'+
+      '<button class="btn" style="padding:6px 10px;font-size:12px;font-weight:600" data-action="price-watch" data-idx="'+i+'" title="Preishistorie" aria-label="Preishistorie">€</button>'+
       '<button class="btn" style="padding:6px 10px" data-action="edit-watch" data-idx="'+i+'" aria-label="Bearbeiten">'+
       '<svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
       '<button class="btn btn-d" style="padding:6px 10px" data-action="delete-watch" data-idx="'+i+'" aria-label="Löschen">'+
@@ -608,10 +665,20 @@ document.getElementById('btn-add-watch').addEventListener('click',function(){
   var name=document.getElementById('w-name').value.trim();
   var brand=document.getElementById('w-brand').value.trim();
   if(!name||!brand){alert('Bitte Name und Marke eingeben.');return;}
-  watches.push({id:uid(),name:name,brand:brand});
+  var ref=document.getElementById('w-ref').value.trim();
+  var pdate=document.getElementById('w-pdate').value;
+  var pprice=document.getElementById('w-price').value;
+  var w={id:uid(),name:name,brand:brand};
+  if(ref)w.ref=ref;
+  if(pdate)w.purchaseDate=pdate;
+  if(pprice)w.purchasePrice=parseFloat(pprice);
+  watches.push(w);
   saveAll();
   document.getElementById('w-name').value='';
   document.getElementById('w-brand').value='';
+  document.getElementById('w-ref').value='';
+  document.getElementById('w-pdate').value='';
+  document.getElementById('w-price').value='';
   renderWatches();
 });
 
@@ -620,10 +687,15 @@ document.getElementById('watch-list').addEventListener('click',function(e){
   if(!btn)return;
   var action=btn.dataset.action;
   var idx=parseInt(btn.dataset.idx,10);
-  if(action==='edit-watch'){
+  if(action==='price-watch'){
+    openPriceModal(idx);
+  } else if(action==='edit-watch'){
     document.getElementById('edit-wi').value=idx;
     document.getElementById('edit-wname').value=watches[idx].name;
     document.getElementById('edit-wbrand').value=watches[idx].brand;
+    document.getElementById('edit-wref').value=watches[idx].ref||'';
+    document.getElementById('edit-wpdate').value=watches[idx].purchaseDate||'';
+    document.getElementById('edit-wprice').value=watches[idx].purchasePrice||'';
     document.getElementById('modal-watch').classList.add('open');
   } else if(action==='delete-watch'){
     if(!confirm('Uhr "'+watches[idx].name.replace(/\n/g,' ')+'" und alle zugehörigen Einträge löschen?'))return;
@@ -638,6 +710,11 @@ document.getElementById('btn-save-watch').addEventListener('click',function(){
   var i=parseInt(document.getElementById('edit-wi').value,10);
   watches[i].name=document.getElementById('edit-wname').value.trim();
   watches[i].brand=document.getElementById('edit-wbrand').value.trim();
+  watches[i].ref=document.getElementById('edit-wref').value.trim()||undefined;
+  var pdate=document.getElementById('edit-wpdate').value;
+  var pprice=document.getElementById('edit-wprice').value;
+  watches[i].purchaseDate=pdate||undefined;
+  watches[i].purchasePrice=pprice?parseFloat(pprice):undefined;
   saveAll();document.getElementById('modal-watch').classList.remove('open');renderWatches();
 });
 document.getElementById('btn-cancel-watch').addEventListener('click',function(){document.getElementById('modal-watch').classList.remove('open');});
@@ -698,6 +775,7 @@ document.getElementById('btn-cancel-log').addEventListener('click',function(){do
 // ── STATISTIKEN ───────────────────────────────────────────
 var statsYear='all';
 var statsWatchId='';
+var statsPriceWatchId='';
 
 function getYearLogs(){
   if(statsYear==='all')return logs;
@@ -890,6 +968,7 @@ function renderStats(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
     });
   }
+  renderPriceChart();
 }
 
 document.getElementById('tab-stats').addEventListener('click',function(e){
@@ -900,6 +979,239 @@ document.getElementById('tab-stats').addEventListener('click',function(e){
 });
 document.getElementById('tab-stats').addEventListener('change',function(e){
   if(e.target.id==='stats-watch-sel'){statsWatchId=e.target.value;renderStats();}
+  if(e.target.id==='price-watch-sel'){statsPriceWatchId=e.target.value;renderPriceChart();}
+});
+
+// ── PREISENTWICKLUNG ─────────────────────────────────────
+function buildPricePoints(w,filterType){
+  var ptype=w.purchaseType||'used';
+  var pts=[];
+  if(w.purchaseDate&&w.purchasePrice){
+    // Purchase price is the base for both series; when no filter use actual purchaseType (modal list)
+    pts.push({date:w.purchaseDate,price:w.purchasePrice,isPurchase:true,type:filterType||ptype});
+  }
+  if(w.priceHistory){w.priceHistory.forEach(function(p){
+    var t=p.type||'used';
+    if(!filterType||t===filterType)pts.push({date:p.date,price:p.price,type:t});
+  });}
+  pts.sort(function(a,b){return a.date.localeCompare(b.date)||a.type.localeCompare(b.type);});
+  // Deduplicate by date+type so Gebraucht and Neu entries on the same date both survive
+  var map={};pts.forEach(function(p){map[p.date+'|'+p.type]=p;});
+  var result=[];Object.keys(map).sort().forEach(function(k){result.push(map[k]);});
+  return result;
+}
+
+function renderPriceChart(){
+  var sel=document.getElementById('price-watch-sel');
+  sel.innerHTML='<option value="">— Uhr wählen —</option>';
+  var hasPriceWatches=false;
+  watches.forEach(function(w){
+    if(w.purchasePrice||w.purchaseDate||(w.priceHistory&&w.priceHistory.length)){
+      hasPriceWatches=true;
+      var o=document.createElement('option');o.value=w.id;o.textContent=w.name+' – '+w.brand;sel.appendChild(o);
+    }
+  });
+  var outer=document.getElementById('price-chart-outer');
+  var empty=document.getElementById('price-empty');
+  var metricsEl=document.getElementById('price-metrics');
+  if(!hasPriceWatches){
+    outer.style.display='none';empty.style.display='block';metricsEl.innerHTML='';
+    if(priceC){priceC.destroy();priceC=null;}return;
+  }
+  empty.style.display='none';
+  if(!statsPriceWatchId||!watches.find(function(w){return w.id===statsPriceWatchId;})){
+    var fw=watches.find(function(w){return w.purchasePrice||(w.priceHistory&&w.priceHistory.length);});
+    statsPriceWatchId=fw?fw.id:'';
+  }
+  if(statsPriceWatchId)sel.value=statsPriceWatchId;
+  var w=watches.find(function(w){return w.id===statsPriceWatchId;});
+  if(!w){metricsEl.innerHTML='';outer.style.display='none';if(priceC){priceC.destroy();priceC=null;}return;}
+
+  // Date range: year filter + purchase date floor
+  var rangeStart=null,rangeEnd=todayStr();
+  if(statsYear!=='all'){
+    rangeStart=statsYear+'-01-01';
+    var ye=statsYear+'-12-31';if(ye<rangeEnd)rangeEnd=ye;
+  }
+  if(w.purchaseDate){if(!rangeStart||w.purchaseDate>rangeStart)rangeStart=w.purchaseDate;}
+  function applyRange(pts){return rangeStart?pts.filter(function(p){return p.date>=rangeStart&&p.date<=rangeEnd;}):pts;}
+
+  var usedPts=applyRange(buildPricePoints(w,'used'));
+  var newPts=applyRange(buildPricePoints(w,'new'));
+
+  if(!usedPts.length&&!newPts.length){
+    metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">Keine Preisdaten für diesen Zeitraum.</div>';
+    outer.style.display='none';if(priceC){priceC.destroy();priceC=null;}return;
+  }
+  outer.style.display='block';
+
+  // Metrics — one block per type that has data, plus Kaufpreis anchor
+  var mh='';
+  if(w.purchasePrice&&w.purchaseDate){
+    mh+='<div class="metric"><div class="ml">Kaufpreis</div><div class="mv" style="font-size:15px">€'+Math.round(w.purchasePrice).toLocaleString('de-DE')+'</div><div class="ms">'+esc(w.purchaseDate)+'</div></div>';
+  }
+  function priceDelta(pts,ref){
+    // % change from ref (purchasePrice) to last point; fallback: first-to-last
+    var base=ref&&ref>0?ref:(pts.length?pts[0].price:0);
+    var last=pts[pts.length-1].price;
+    return base>0?(last-base)/base*100:0;
+  }
+  if(usedPts.length){
+    var lu=usedPts[usedPts.length-1];
+    var cu=priceDelta(usedPts,w.purchasePrice);
+    var ccu=cu>=0?'var(--green)':'var(--red)';
+    mh+='<div class="metric"><div class="ml">Werterhalt getragen</div>'+
+      '<div class="mv" style="font-size:15px">€'+Math.round(lu.price).toLocaleString('de-DE')+'</div>'+
+      '<div class="ms" style="color:'+ccu+'">'+(cu>=0?'+':'')+cu.toFixed(1)+'% vs. Kauf</div></div>';
+  }
+  if(newPts.length){
+    var ln=newPts[newPts.length-1];
+    var cn=priceDelta(newPts,w.purchasePrice);
+    var ccn=cn>=0?'var(--green)':'var(--red)';
+    mh+='<div class="metric"><div class="ml">Werterhalt ungetragen</div>'+
+      '<div class="mv" style="font-size:15px">€'+Math.round(ln.price).toLocaleString('de-DE')+'</div>'+
+      '<div class="ms" style="color:'+ccn+'">'+(cn>=0?'+':'')+cn.toFixed(1)+'% vs. Kauf</div></div>';
+  }
+  metricsEl.innerHTML=mh;
+
+  // Merged date axis from both series
+  var dateSet={};
+  usedPts.forEach(function(p){dateSet[p.date]=1;});
+  newPts.forEach(function(p){dateSet[p.date]=1;});
+  var labels=Object.keys(dateSet).sort();
+  var usedMap={},newMap={};
+  usedPts.forEach(function(p){usedMap[p.date]=Math.round(p.price);});
+  newPts.forEach(function(p){newMap[p.date]=Math.round(p.price);});
+
+  var wci=watches.indexOf(w);
+  var hex=COLORS[wci>=0?wci%COLORS.length:0];
+  var rgb=parseInt(hex.slice(1,3),16)+','+parseInt(hex.slice(3,5),16)+','+parseInt(hex.slice(5,7),16);
+
+  // Always include both lines so the legend is stable
+  var datasets=[
+    {
+      label:'Werterhalt getragen',
+      data:labels.map(function(d){return usedMap[d]!==undefined?usedMap[d]:null;}),
+      borderColor:hex,backgroundColor:'rgba('+rgb+',0.10)',
+      fill:true,tension:0.3,borderWidth:2.5,spanGaps:true,
+      pointRadius:5,pointHoverRadius:7,pointStyle:'circle',
+      pointBackgroundColor:hex,pointBorderColor:'#13151a',pointBorderWidth:1.5
+    },
+    {
+      label:'Werterhalt ungetragen',
+      data:labels.map(function(d){return newMap[d]!==undefined?newMap[d]:null;}),
+      borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.0)',
+      fill:false,tension:0.3,borderWidth:2,borderDash:[7,4],spanGaps:true,
+      pointRadius:5,pointHoverRadius:7,pointStyle:'rectRot',
+      pointBackgroundColor:'#f5a623',pointBorderColor:'#13151a',pointBorderWidth:1.5
+    }
+  ];
+  // Kaufpreis dotted baseline
+  if(w.purchasePrice&&labels.length){
+    datasets.push({
+      label:'Kaufpreis',
+      data:labels.map(function(){return Math.round(w.purchasePrice);}),
+      borderColor:'rgba('+rgb+',0.35)',borderDash:[2,5],borderWidth:1.5,
+      pointRadius:0,fill:false,tension:0,spanGaps:true
+    });
+  }
+
+  if(priceC){priceC.destroy();priceC=null;}
+  priceC=new Chart(document.getElementById('priceChart'),{
+    type:'line',
+    data:{labels:labels,datasets:datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{
+          display:true,
+          labels:{
+            color:'#8a95a8',font:{size:11},boxWidth:12,padding:14,
+            filter:function(item){return item.text!=='Kaufpreis';}
+          }
+        },
+        tooltip:{
+          mode:'index',intersect:false,
+          filter:function(item){return item.parsed.y!==null&&item.dataset.label!=='Kaufpreis';},
+          callbacks:{label:function(ctx){return ctx.dataset.label+': €'+ctx.parsed.y.toLocaleString('de-DE');}}
+        }
+      },
+      scales:{
+        x:{ticks:{color:'#4a5268',maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:'#1a1d24'}},
+        y:{beginAtZero:false,ticks:{color:'#4a5268',callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:'#1a1d24'}}
+      }
+    }
+  });
+}
+
+// ── PREISHISTORIE MODAL ───────────────────────────────────
+function renderPriceHistoryList(wid){
+  var w=watches.find(function(x){return x.id===wid;});
+  if(!w){document.getElementById('price-history-list').innerHTML='';return;}
+  var pts=buildPricePoints(w);
+  var el=document.getElementById('price-history-list');
+  if(!pts.length){el.innerHTML='<div class="empty" style="padding:14px">Noch keine Preisdaten.</div>';return;}
+  el.innerHTML=pts.map(function(p){
+    var isNew=p.type==='new';
+    var typeBadge='<span class="badge" style="font-size:10px;'+(isNew?'background:#2e1e05;color:var(--amber)':'background:var(--bg3);color:var(--t2)')+'">'+(isNew?'Neu':'Gebraucht')+'</span>';
+    return '<div class="log-row" style="font-size:12px">'+
+      '<div style="display:flex;align-items:center;gap:5px">'+esc(p.date)+
+      (p.isPurchase?'<span style="font-size:10px;color:var(--t3)">(Kauf)</span>':'')+
+      typeBadge+'</div>'+
+      '<div style="display:flex;align-items:center;gap:6px"><span style="font-weight:700">€'+Math.round(p.price).toLocaleString('de-DE')+'</span>'+
+      (!p.isPurchase?'<button class="btn btn-d" style="padding:3px 7px;font-size:11px" data-action="del-price" data-pdate="'+esc(p.date)+'" data-pprice="'+p.price+'" data-ptype="'+p.type+'">×</button>':'')+'</div></div>';
+  }).join('');
+}
+
+function openPriceModal(idx){
+  var wid=watches[idx].id;
+  document.getElementById('price-wi').value=wid;
+  document.getElementById('modal-price-title').textContent='Preishistorie — '+watches[idx].name;
+  document.getElementById('new-price-date').value=todayStr();
+  document.getElementById('new-price-val').value='';
+  renderPriceHistoryList(wid);
+  document.getElementById('modal-price').classList.add('open');
+}
+
+document.getElementById('price-history-list').addEventListener('click',function(e){
+  var btn=e.target.closest('button[data-action="del-price"]');
+  if(!btn)return;
+  var wid=document.getElementById('price-wi').value;
+  var w=watches.find(function(x){return x.id===wid;});
+  if(!w)return;
+  var tdate=btn.dataset.pdate,tprice=parseFloat(btn.dataset.pprice),ttype=btn.dataset.ptype;
+  w.priceHistory=(w.priceHistory||[]).filter(function(p){
+    return !(p.date===tdate&&p.price===tprice&&(p.type||'used')===ttype);
+  });
+  saveAll();renderPriceHistoryList(wid);
+});
+
+document.getElementById('btn-add-price-entry').addEventListener('click',function(){
+  var wid=document.getElementById('price-wi').value;
+  var date=document.getElementById('new-price-date').value;
+  var val=document.getElementById('new-price-val').value;
+  if(!date||!val){alert('Bitte Datum und Preis eingeben.');return;}
+  var price=parseFloat(val);
+  if(isNaN(price)||price<0){alert('Ungültiger Preis.');return;}
+  var activeBtn=document.querySelector('#modal-price .pill.active[data-ptype]');
+  var ptype=activeBtn?activeBtn.dataset.ptype:'used';
+  var w=watches.find(function(x){return x.id===wid;});
+  if(!w){alert('Uhr nicht gefunden.');return;}
+  if(!w.priceHistory)w.priceHistory=[];
+  w.priceHistory.push({date:date,price:price,type:ptype});
+  saveAll();renderPriceHistoryList(wid);
+  document.getElementById('new-price-val').value='';
+});
+
+document.getElementById('modal-price').addEventListener('click',function(e){
+  var btn=e.target.closest('.pill[data-ptype]');
+  if(!btn)return;
+  document.querySelectorAll('#modal-price .pill[data-ptype]').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+});
+
+document.getElementById('btn-cancel-price').addEventListener('click',function(){
+  document.getElementById('modal-price').classList.remove('open');
 });
 
 // ── EXPORT ────────────────────────────────────────────────
@@ -1068,9 +1380,17 @@ document.getElementById('btn-do-import').addEventListener('click',function(){
   if(impJsonData){
     if(mode==='replace'){logs=[];watches=[];statsYear='all';statsWatchId='';}
     var added=0,dupes=0,newW=0,results=[];
+    function applyWatchFields(target,src){
+      var fields=['brand','ref','purchaseDate','purchasePrice','purchaseType','priceHistory'];
+      fields.forEach(function(f){if(src[f]!==undefined)target[f]=src[f];});
+    }
     impJsonData.watches.forEach(function(sw){
-      if(!watches.find(function(w){return w.name.toLowerCase()===sw.name.toLowerCase();})){
-        watches.push({id:uid(),name:sw.name,brand:sw.brand||''});newW++;
+      var existing=watches.find(function(w){return w.name.toLowerCase()===sw.name.toLowerCase();});
+      if(!existing){
+        var nw={id:uid(),name:sw.name,brand:sw.brand||''};
+        applyWatchFields(nw,sw);watches.push(nw);newW++;
+      } else {
+        applyWatchFields(existing,sw);
       }
     });
     impJsonData.logs.forEach(function(l){
@@ -1078,7 +1398,7 @@ document.getElementById('btn-do-import').addEventListener('click',function(){
       var sw=impJsonData.watches.find(function(w){return w.id===l.watchId;});
       if(!sw){results.push({watchName:'?',date:l.date,status:'skip'});return;}
       var w=watches.find(function(w){return w.name.toLowerCase()===sw.name.toLowerCase();});
-      if(!w){w={id:uid(),name:sw.name,brand:sw.brand||''};watches.push(w);newW++;}
+      if(!w){var nw2={id:uid(),name:sw.name,brand:sw.brand||''};applyWatchFields(nw2,sw);watches.push(nw2);w=nw2;newW++;}
       if(logs.some(function(x){return x.watchId===w.id&&x.date===l.date;})){dupes++;results.push({watchName:sw.name,date:l.date,status:'dupe'});return;}
       logs.unshift({date:l.date,watchId:w.id,note:l.note||'',id:uid()});
       added++;results.push({watchName:sw.name,date:l.date,status:'ok'});
@@ -1146,9 +1466,7 @@ function renderProfil(){
   inp.value=name;
   if(!inp._listening){
     inp._listening=true;
-    inp.addEventListener('input',function(){
-      sv('wt_name',this.value.trim());
-    });
+    inp.addEventListener('input',function(){sv('wt_name',this.value.trim());});
   }
   var el=document.getElementById('profil-metrics');
   if(!watches.length&&!logs.length){

@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Watchtracker</title>
+<title>Watch Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -161,7 +161,7 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
   <div class="app-header-icon" id="btn-about" role="button" tabindex="0" aria-label="Über die App">
     <svg style="width:17px;height:17px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
   </div>
-  <span class="app-title" data-i18n="app.title">Watchtracker</span>
+  <span class="app-title" data-i18n="app.title">Watch Tracker</span>
 </div>
 <div class="nav">
   <button class="active" data-tab="start">
@@ -486,7 +486,7 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <div class="about-icon">
       <svg style="width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
     </div>
-    <h3 style="text-align:center;margin-bottom:12px" data-i18n="about.title">Watchtracker</h3>
+    <h3 style="text-align:center;margin-bottom:12px" data-i18n="about.title">Watch Tracker</h3>
     <p data-i18n="about.desc1">Dein persönliches Logbuch für Uhren. Halte täglich fest, welche Uhr du trägst, und beobachte über Statistiken und Heatmaps wie sich deine Tragegewohnheiten entwickeln.</p>
     <p data-i18n="about.desc2">Verwalte deine Sammlung, pflege Kaufpreise und verfolge die Wertentwicklung deiner Uhren — alles lokal in deinem Browser gespeichert, ohne Konto oder Cloud.</p>
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px">
@@ -512,7 +512,7 @@ function saveAll(){sv('wt_w',watches);sv('wt_l',logs);}
 var curLang=ld('wt_lang','de');
 var LANG={
   de:{
-    'app.title':'Watchtracker',
+    'app.title':'Watch Tracker',
     'nav.overview':'Uhr tracken','nav.watches':'Uhren','nav.log':'Logbuch','nav.stats':'Statistiken','nav.settings':'Einstellungen',
     'p.sub':'Dein persönliches Uhrenlogbuch','p.desc':'Halte täglich fest, welche Uhr du trägst. Entdecke Muster in deiner Sammlung, sieh deinen Streak wachsen und exportiere alles als Excel oder JSON.',
     'p.greet':'Willkommen!','p.greetName':'Willkommen zurück, {n}!',
@@ -540,7 +540,7 @@ var LANG={
     'imp.doneEntries':'Einträge importiert','imp.doneNewW':'neue Uhren','imp.doneDupes':'Duplikate übersprungen',
     'm.editWatch':'Uhr bearbeiten','m.editLog':'Eintrag bearbeiten','m.cancel':'Abbrechen','m.save':'Speichern','m.close':'Schließen','m.add':'Hinzufügen','m.priceNew':'Neuen Preis eintragen','m.priceLabel':'Preis €','m.used':'Gebraucht','m.new':'Neu','m.purgeTitle':'Alle Daten löschen?','m.purgeDesc':'Diese Aktion löscht alle Uhren, Einträge und Preishistorien unwiderruflich.','m.purgeWarn':'Sie kann nicht rückgängig gemacht werden.','m.purgeConfirm':'Alle Daten löschen',
     'm.noPriceData':'Noch keine Preisdaten.','m.purchase':'(Kauf)','m.priceHistoryTitle':'Preishistorie — {n}','m.priceAlertEmpty':'Bitte Datum und Preis eingeben.','m.priceAlertInvalid':'Ungültiger Preis.','m.watchNotFound':'Uhr nicht gefunden.',
-    'about.title':'Watchtracker','about.desc1':'Dein persönliches Logbuch für Uhren. Halte täglich fest, welche Uhr du trägst, und beobachte über Statistiken und Heatmaps wie sich deine Tragegewohnheiten entwickeln.','about.desc2':'Verwalte deine Sammlung, pflege Kaufpreise und verfolge die Wertentwicklung deiner Uhren — alles lokal in deinem Browser gespeichert, ohne Konto oder Cloud.','about.tag1':'Lokal & privat','about.tag2':'Kein Account nötig','about.tag3':'Export als Excel & JSON',
+    'about.title':'Watch Tracker','about.desc1':'Dein persönliches Logbuch für Uhren. Halte täglich fest, welche Uhr du trägst, und beobachte über Statistiken und Heatmaps wie sich deine Tragegewohnheiten entwickeln.','about.desc2':'Verwalte deine Sammlung, pflege Kaufpreise und verfolge die Wertentwicklung deiner Uhren — alles lokal in deinem Browser gespeichert, ohne Konto oder Cloud.','about.tag1':'Lokal & privat','about.tag2':'Kein Account nötig','about.tag3':'Export als Excel & JSON',
     'wa.worn':'x getragen','wa.edit':'Bearbeiten','wa.delete':'Löschen',
     'e.noWatches':'Noch keine Uhren. Füge deine erste Uhr hinzu.','e.noLogs':'Noch keine Einträge vorhanden.',
     'met.watches':'Uhren','met.entries':'Einträge gesamt','met.days':'Tage erfasst','met.streak':'Aktueller Streak','met.streakSub':'Tage am Stück','met.fav':'Lieblingsuhr','met.since':'Dabei seit',
@@ -1129,6 +1129,7 @@ function renderStats(){
   document.getElementById('heatmap-title').textContent=htitle;
   renderHeatmap(filteredLogs);
   // Bar chart (year scope, all watches, highlight selected)
+  var cc=chartColors();
   var counts=watches.map(function(w){return countMap[w.id]||0;});
   var labels=watches.map(function(w){return w.name;});
   var dimColor='rgba('+cc.accentRgb+',0.15)';
@@ -1139,7 +1140,6 @@ function renderStats(){
     barC.data.datasets[0].data=counts;barC.data.datasets[0].backgroundColor=bgColors;barC.update('none');
   }else{
     if(barC)barC.destroy();
-    var cc=chartColors();
     barC=new Chart(document.getElementById('barChart'),{
       type:'bar',
       data:{labels:labels,datasets:[{data:counts,backgroundColor:bgColors,borderWidth:0,borderRadius:4}]},

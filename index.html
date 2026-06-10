@@ -3,7 +3,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Uhrentracker</title>
+<title>Watchtracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -11,10 +11,65 @@
   --bg0:#0c0d10;--bg1:#13151a;--bg2:#1a1d24;--bg3:#22262f;--bg4:#2a2f3a;
   --border:#252930;--border2:#343a48;
   --t1:#eef0f5;--t2:#8a95a8;--t3:#4a5268;
-  --accent:#4f8ef7;--accent2:#2d5fc4;
+  --accent:#1db86a;--accent2:#149a56;--accent-rgb:29,184,106;
   --green:#2ecc8a;--red:#e05555;--amber:#f5a623;
   --r:10px;--rs:7px;
+  --header-bg:linear-gradient(135deg,#071c10 0%,#0d3520 100%);
 }
+html[data-theme="light"]{
+  --bg0:#f0f4f1;--bg1:#ffffff;--bg2:#e8ede9;--bg3:#d8e2da;--bg4:#ccd8ce;
+  --border:#d4ddd6;--border2:#b8c8bc;
+  --t1:#1a1d24;--t2:#555c6e;--t3:#8a95a8;
+  --accent:#0f7040;--accent2:#0a5530;--accent-rgb:15,112,64;
+  --green:#1a9e5f;--red:#d63031;--amber:#d4840e;
+  --header-bg:linear-gradient(135deg,#073d20 0%,#0f6038 100%);
+}
+/* ── Omega Blue ── */
+html[data-brand="blue"]{--accent:#4f8ef7;--accent2:#2d5fc4;--accent-rgb:79,142,247;--header-bg:linear-gradient(135deg,#141c32 0%,#0d1525 100%)}
+html[data-theme="light"][data-brand="blue"]{--accent:#2563d4;--accent2:#1a4aaa;--accent-rgb:37,99,212;--header-bg:linear-gradient(135deg,#1e3d82 0%,#2952b8 100%)}
+/* ── Tudor Red ── */
+html[data-brand="red"]{--accent:#cc3838;--accent2:#a02828;--accent-rgb:204,56,56;--header-bg:linear-gradient(135deg,#1c0808 0%,#3a1010 100%)}
+html[data-theme="light"][data-brand="red"]{--accent:#a02020;--accent2:#782020;--accent-rgb:160,32,32;--header-bg:linear-gradient(135deg,#6b1515 0%,#a02020 100%)}
+html[data-theme="light"] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555c6e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")}
+html[data-theme="light"] .bok{background:#d4f0e4;color:#0a6030}
+html[data-theme="light"] .bwarn{background:#fdf0d4;color:#9a5d00}
+html[data-theme="light"] .berr{background:#fde0e0;color:#b02020}
+html[data-theme="light"] .btn-s{background:#d8f0e4;color:#0a6030;border-color:#90ccaa}
+html[data-theme="light"] .btn-s:hover{background:#b8e8d0;color:#0a6030}
+html[data-theme="light"] .btn-d{background:transparent;color:var(--red);border-color:#f0b8b8}
+html[data-theme="light"] .btn-d:hover{background:#fde8e8;border-color:var(--red)}
+html[data-theme="light"] .log-row:hover{background:rgba(0,0,0,.03)}
+html[data-theme="light"] .reminder{color:var(--accent2)}
+.toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 0;gap:8px}
+.app-header{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:none;background:var(--header-bg)}
+.app-header-icon{width:30px;height:30px;border-radius:8px;background:rgba(var(--accent-rgb),.18);border:1px solid rgba(var(--accent-rgb),.3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.app-title{font-size:15px;font-weight:700;color:#e8eef8;letter-spacing:-.01em}
+html[data-theme="light"] .app-title{color:#fff}
+html[data-theme="light"] .app-header-icon{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.3)}
+html[data-theme="light"] .app-header-icon svg{stroke:#fff !important}
+.app-header-icon{cursor:pointer;transition:opacity .15s}
+.app-header-icon:hover{opacity:.75}
+.brand-swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;flex-shrink:0;transition:all .15s;outline:none;position:relative}
+.brand-swatch.active::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--t1);opacity:.6}
+.brand-swatch:hover{transform:scale(1.12)}
+.brand-swatch[data-tip]:hover::before{content:attr(data-tip);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--t1);font-size:11px;white-space:nowrap;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);pointer-events:none;z-index:99;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.brand-swatch[data-tip]:hover::after{content:'';position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border2);pointer-events:none;z-index:99}
+.about-modal{width:320px}
+.about-modal .about-icon{width:44px;height:44px;border-radius:12px;background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.25);display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+.about-modal p{font-size:13px;color:var(--t2);line-height:1.7;margin:0 0 10px}
+.tab-inner{max-width:600px;margin:0 auto}
+.settings-wrap{max-width:440px;margin:0 auto}
+.settings-wrap .btn{white-space:normal;text-align:center;min-width:0;display:flex;width:100%;box-sizing:border-box}
+.s-name-hint{font-size:11px;color:var(--t3);margin-top:6px}
+.welcome-card{background:rgba(var(--accent-rgb),.07)!important;border-color:rgba(var(--accent-rgb),.18)!important}
+.welcome-card-icon{width:36px;height:36px;border-radius:10px;background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toggle-label{font-size:13px;color:var(--t1);display:flex;align-items:center;gap:8px}
+.toggle{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bg3);border-radius:24px;transition:.2s;cursor:pointer;border:1px solid var(--border2)}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:var(--t3);border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{background:var(--accent);border-color:var(--accent)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px);background:#fff}
 html,body{background:var(--bg0);color:var(--t1);font-family:'SF Pro Display',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;font-size:14px;line-height:1.5}
 .app{min-height:620px;background:var(--bg0);position:relative}
 .nav{display:flex;gap:2px;padding:10px 14px;background:var(--bg1);border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -36,7 +91,7 @@ select option{background:var(--bg2);color:var(--t1)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--t2);font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
 .btn:hover{background:var(--bg3);color:var(--t1)}
 .btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-p:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
-.btn-s{background:#0d2818;color:var(--green);border-color:#1a4028}.btn-s:hover{background:#1a4028;color:var(--green)}
+.btn-s{background:rgba(var(--accent-rgb),.1);color:var(--green);border-color:rgba(var(--accent-rgb),.25)}.btn-s:hover{background:rgba(var(--accent-rgb),.18);color:var(--green)}
 .btn-d{background:transparent;color:var(--red);border-color:#3a1818}.btn-d:hover{background:#2a1010;border-color:var(--red)}
 .fg{margin-bottom:10px}.fg label{display:block;font-size:11px;color:var(--t3);margin-bottom:4px;font-weight:500}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -48,7 +103,7 @@ select option{background:var(--bg2);color:var(--t1)}
 .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .bok{background:#0d2e1e;color:var(--green)}.bwarn{background:#2e1e05;color:var(--amber)}.berr{background:#2e0d0d;color:var(--red)}
 .brand-badge{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.5px;flex-shrink:0;margin-right:12px;font-family:'Courier New',monospace}
-.reminder{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:13px;color:#8db8ff}
+.reminder{background:rgba(var(--accent-rgb),.08);border:1px solid rgba(var(--accent-rgb),.2);border-radius:var(--rs);padding:10px 14px;display:flex;align-items:center;gap:9px;margin-bottom:12px;font-size:13px;color:var(--accent)}
 .drop-zone{border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .15s}
 .drop-zone:hover,.drop-zone.drag-over{background:var(--bg2);border-color:var(--accent)}
 .schema-wrap{margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;font-size:11px}
@@ -73,7 +128,7 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 .day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
 .day-label{font-size:13px;font-weight:700;color:var(--t1)}
 .day-sub{font-size:11px;color:var(--t3)}
-.day-today{color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(79,142,247,.12);border:1px solid rgba(79,142,247,.25);padding:2px 8px;border-radius:20px}
+.day-today{color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:rgba(var(--accent-rgb),.12);border:1px solid rgba(var(--accent-rgb),.25);padding:2px 8px;border-radius:20px}
 .day-watch-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)}
 .day-watch-row:last-child{border-bottom:none}
 .day-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -88,329 +143,327 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 .imp-mode-opt{display:block;border:1px solid var(--border2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--t2);cursor:pointer;transition:all .15s;background:var(--bg2)}
 .imp-mode-opt input{display:none}
 .imp-mode-opt:hover{border-color:var(--accent);color:var(--t1)}
-.imp-mode-sel{border-color:var(--accent)!important;background:rgba(79,142,247,.08)!important;color:var(--t1)!important}
+.imp-mode-sel{border-color:var(--accent)!important;background:rgba(var(--accent-rgb),.08)!important;color:var(--t1)!important}
 
 /* ── Statistiken Filter & Heatmap ── */
 .filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
 .pill{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--t3);font-family:inherit;transition:all .15s;white-space:nowrap}
 .pill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .pill:hover:not(.active){background:var(--bg3);color:var(--t1)}
+.lang-btn{padding:4px 10px;border-radius:var(--rs);border:1px solid var(--border2);background:transparent;color:var(--t2);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.04em}
+.lang-btn:hover:not(.active){background:var(--bg3);color:var(--t1)}
+.lang-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="app" id="app">
+<div class="app-header">
+  <div class="app-header-icon" id="btn-about" role="button" tabindex="0" aria-label="Über die App">
+    <svg style="width:17px;height:17px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+  </div>
+  <span class="app-title" data-i18n="app.title">Watchtracker</span>
+</div>
 <div class="nav">
   <button class="active" data-tab="start">
-    <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Übersicht
-  </button>
-  <button data-tab="uhren">
     <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
-    Uhren
+    <span data-i18n="nav.overview">Uhr tracken</span>
   </button>
   <button data-tab="log">
     <svg class="ico" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-    Logbuch
+    <span data-i18n="nav.log">Logbuch</span>
   </button>
   <button data-tab="stats">
     <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-    Statistiken
+    <span data-i18n="nav.stats">Statistiken</span>
   </button>
-  <button data-tab="export">
-    <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Export / Import
+  <button data-tab="uhren">
+    <svg class="ico" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    <span data-i18n="nav.watches">Uhren</span>
   </button>
-  <button data-tab="profil">
-    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    Profil
+  <button data-tab="settings">
+    <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span data-i18n="nav.settings">Einstellungen</span>
   </button>
 </div>
 
-<!-- ÜBERSICHT & HEUTE -->
+<!-- UHR TRACKEN -->
 <div id="tab-start" class="tab active">
-  <div style="font-size:20px;font-weight:700;color:var(--t1);padding:0 2px;margin-bottom:14px">Übersicht</div>
+<div class="tab-inner">
+  <div id="start-welcome"></div>
   <div id="start-reminder"></div>
   <div class="metric-grid" id="start-metrics"></div>
-  <div class="card">
-    <div class="stitle">Welche Uhr trägst du heute?</div>
-    <div class="fg"><label>Datum</label><input type="date" id="log-date"></div>
-    <div class="fg"><label>Uhr auswählen</label><select id="log-watch"><option value="">— Uhr wählen —</option></select></div>
-    <div class="fg" style="margin-bottom:14px"><label>Notiz (optional)</label><input type="text" id="log-note" placeholder="z.B. Hochzeit, Bürotag, Wanderung …"></div>
+  <div class="card" id="log-form-card">
+    <div class="stitle" data-i18n="st.todayQ">Welche Uhr trägst du heute?</div>
+    <div class="fg"><label data-i18n="st.date">Datum</label><input type="date" id="log-date"></div>
+    <div class="fg"><label data-i18n="st.watchSel">Uhr auswählen</label><select id="log-watch"><option value="" data-i18n="st.watchOpt">— Uhr wählen —</option></select></div>
+    <div class="fg" style="margin-bottom:14px"><label data-i18n="st.note">Notiz (optional)</label><input type="text" id="log-note" placeholder="z.B. Hochzeit, Bürotag, Wanderung …" data-i18n-ph="st.notePh"></div>
     <button class="btn btn-p" id="btn-add-log">
       <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Eintragen
+      <span data-i18n="st.logBtn">Eintragen</span>
     </button>
   </div>
   <div class="card" id="today-card" style="display:none">
-    <div class="stitle">Heute eingetragen</div>
+    <div class="stitle" data-i18n="st.todayCard">Heute eingetragen</div>
     <div id="today-list"></div>
   </div>
-  <div class="stitle" style="padding:0 2px 8px">Letzte Tage</div>
+  <div id="recent-label" class="stitle" style="padding:0 2px 8px" data-i18n="st.recent">Letzte Tage</div>
   <div id="start-days"></div>
+</div>
 </div>
 
 <!-- UHREN -->
 <div id="tab-uhren" class="tab">
+<div class="tab-inner">
   <div class="card">
-    <div class="stitle">Neue Uhr hinzufügen</div>
+    <div class="stitle" data-i18n="w.addTitle">Neue Uhr hinzufügen</div>
     <div class="frow" style="margin-bottom:10px">
-      <div class="fg" style="margin-bottom:0"><label>Name / Modell</label><input type="text" id="w-name" placeholder="Submariner Date"></div>
-      <div class="fg" style="margin-bottom:0"><label>Marke</label><input type="text" id="w-brand" placeholder="Rolex"></div>
+      <div class="fg" style="margin-bottom:0"><label data-i18n="w.name">Name / Modell</label><input type="text" id="w-name" placeholder="Submariner Date"></div>
+      <div class="fg" style="margin-bottom:0"><label data-i18n="w.brand">Marke</label><input type="text" id="w-brand" placeholder="Rolex"></div>
     </div>
     <div class="frow" style="margin-bottom:10px">
-      <div class="fg" style="margin-bottom:0"><label>Referenznummer (optional)</label><input type="text" id="w-ref" placeholder="126610LN"></div>
-      <div class="fg" style="margin-bottom:0"><label>Kaufpreis € (optional)</label><input type="number" id="w-price" placeholder="12000" min="0" step="1"></div>
+      <div class="fg" style="margin-bottom:0"><label data-i18n="w.ref">Referenznummer (optional)</label><input type="text" id="w-ref" placeholder="126610LN"></div>
+      <div class="fg" style="margin-bottom:0"><label data-i18n="w.price">Kaufpreis € (optional)</label><input type="number" id="w-price" placeholder="12000" min="0" step="1"></div>
     </div>
-    <div class="fg" style="margin-bottom:10px"><label>Kaufdatum (optional)</label><input type="date" id="w-pdate"></div>
+    <div class="fg" style="margin-bottom:10px"><label data-i18n="w.purchDate">Kaufdatum (optional)</label><input type="date" id="w-pdate"></div>
     <button class="btn btn-p" id="btn-add-watch">
       <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Hinzufügen
+      <span data-i18n="w.addBtn">Hinzufügen</span>
     </button>
   </div>
   <div id="watch-list"></div>
+</div><!-- /tab-inner -->
 </div>
 
 <!-- LOGBUCH -->
 <div id="tab-log" class="tab">
+<div class="tab-inner">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span class="stitle" style="margin-bottom:0">Alle Einträge</span>
+    <span class="stitle" style="margin-bottom:0" data-i18n="l.title">Alle Einträge</span>
   </div>
   <div class="card" style="padding:0;overflow:hidden"><div id="log-list"></div></div>
+</div>
 </div>
 
 <!-- STATISTIKEN -->
 <div id="tab-stats" class="tab">
+<div class="tab-inner">
   <div class="filter-bar">
     <div id="year-pills" style="display:flex;gap:4px;flex-wrap:wrap"></div>
     <select id="stats-watch-sel" style="width:auto;min-width:140px;font-size:12px;padding:5px 28px 5px 10px"></select>
   </div>
   <div class="metric-grid" id="metric-grid"></div>
   <div class="card">
-    <div class="stitle" id="heatmap-title">Trageverhalten</div>
+    <div class="stitle" id="heatmap-title" data-i18n="stat.wearing">Trageverhalten</div>
     <div id="heatmap-wrap"></div>
   </div>
   <div class="card">
-    <div class="stitle">Häufigkeit pro Uhr</div>
+    <div class="stitle" data-i18n="stat.freq">Häufigkeit pro Uhr</div>
     <div id="bar-wrap" style="position:relative;width:100%;height:200px"><canvas id="barChart"></canvas></div>
   </div>
   <div class="card">
-    <div class="stitle" id="line-chart-title">Zeitverlauf — letzte 30 Tage</div>
+    <div class="stitle" id="line-chart-title" data-i18n="stat.timeline">Zeitverlauf — letzte 30 Tage</div>
     <div style="position:relative;width:100%;height:160px"><canvas id="lineChart"></canvas></div>
   </div>
   <div class="card">
-    <div class="stitle">Verteilung</div>
+    <div class="stitle" data-i18n="stat.dist">Verteilung</div>
     <div id="pie-legend" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:12px"></div>
     <div style="position:relative;width:100%;height:180px"><canvas id="pieChart"></canvas></div>
   </div>
   <div class="card" id="price-card">
-    <div class="stitle">Preisentwicklung</div>
+    <div class="stitle" data-i18n="stat.price">Preisentwicklung</div>
     <div class="metric-grid" id="price-metrics" style="margin-bottom:10px"></div>
     <div id="price-chart-outer" style="position:relative;width:100%;height:200px"><canvas id="priceChart"></canvas></div>
-    <div id="price-empty" style="display:none" class="empty">Kaufpreis bei einer Uhr hinterlegen oder über € Preiseinträge erfassen.</div>
+    <div id="price-empty" style="display:none" class="empty" data-i18n="stat.priceEmpty">Kaufpreis bei einer Uhr hinterlegen oder über € Preiseinträge erfassen.</div>
   </div>
+</div><!-- /tab-inner -->
 </div>
 
-<!-- EXPORT / IMPORT -->
-<div id="tab-export" class="tab">
+<!-- EINSTELLUNGEN -->
+<div id="tab-settings" class="tab">
+<div class="settings-wrap">
+
+  <!-- NAME -->
+  <div class="card">
+    <div class="stitle" data-i18n="s.nameTitle">Dein Name</div>
+    <div class="fg" style="margin-bottom:4px"><input type="text" id="settings-name" placeholder="Name eingeben …" data-i18n-ph="s.namePh" maxlength="60"></div>
+    <p class="s-name-hint" data-i18n="s.nameHint">Wird in Willkommensnachrichten verwendet.</p>
+  </div>
+
+  <!-- DARSTELLUNG -->
+  <div class="card">
+    <div class="stitle" data-i18n="s.display">Darstellung</div>
+    <div class="toggle-wrap">
+      <span class="toggle-label">
+        <svg style="width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span data-i18n="s.darkMode">Dunkles Design</span>
+      </span>
+      <label class="toggle"><input type="checkbox" id="theme-toggle"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-wrap" style="border-top:1px solid var(--border);padding-top:12px;margin-top:2px">
+      <span class="toggle-label" style="flex-shrink:0">
+        <svg style="width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M12 2a6 6 0 0 1 6 6c0 4-6 12-6 12S6 12 6 8a6 6 0 0 1 6-6z"/></svg>
+        <span data-i18n="s.brand">Farbschema</span>
+      </span>
+      <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
+        <button class="brand-swatch active" id="brand-green" data-brand="green" data-tip="Rolex Grün" style="background:#1db86a"></button>
+        <button class="brand-swatch" id="brand-blue" data-brand="blue" data-tip="Omega Blau" style="background:#4f8ef7"></button>
+        <button class="brand-swatch" id="brand-red" data-brand="red" data-tip="Tudor Rot" style="background:#cc3838"></button>
+      </div>
+    </div>
+    <div class="toggle-wrap" style="border-top:1px solid var(--border);padding-top:12px;margin-top:2px">
+      <span class="toggle-label" style="flex-shrink:0">
+        <svg style="width:16px;height:16px;stroke:var(--t2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span data-i18n="s.language">Sprache</span>
+      </span>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button class="lang-btn" id="lang-de">DE</button>
+        <button class="lang-btn" id="lang-en">EN</button>
+      </div>
+    </div>
+  </div>
 
   <!-- EXPORT -->
   <div class="card">
-    <div class="stitle">Daten exportieren</div>
-    <div class="export-grid">
-      <div class="export-opt" id="exp-xls">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg style="width:20px;height:20px;stroke:var(--green);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          <div class="eo-title">Matrix-Excel (.xlsx)</div>
-        </div>
-        <div class="eo-desc">Gleiche Format wie der Import: Uhren als Spalten, Tage als Zeilen, x = getragen. Ideal zum Weiterarbeiten.</div>
+    <div class="stitle" data-i18n="s.export">Daten exportieren</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div>
+        <button class="btn btn-s" id="btn-exp-xls" style="width:100%;justify-content:flex-start">
+          <svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span data-i18n="s.exportXls">Excel (.xlsx)</span>
+        </button>
+        <p class="s-name-hint" style="margin-top:5px" data-i18n="s.xlsDesc">Uhren, Logeinträge und Preishistorie — ideal für Auswertungen.</p>
       </div>
-      <div class="export-opt" id="exp-json">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <svg style="width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-          <div class="eo-title">Backup JSON</div>
-        </div>
-        <div class="eo-desc">Vollständiges Daten-Backup aller Uhren und Einträge. Kann jederzeit reimportiert werden.</div>
+      <div>
+        <button class="btn" id="btn-exp-json" style="width:100%;justify-content:flex-start">
+          <svg class="ico" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <span data-i18n="s.exportJson">JSON</span>
+        </button>
+        <p class="s-name-hint" style="margin-top:5px" data-i18n="s.jsonDesc">Vollständiger Datenexport — maschinenlesbar, ideal für Backups.</p>
       </div>
-    </div>
-
-    <div style="margin-bottom:10px">
-      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:6px;font-weight:500">Zeitraum für Excel-Export</label>
-      <div class="frow">
-        <div class="fg" style="margin-bottom:0"><label>Von</label><input type="date" id="exp-from"></div>
-        <div class="fg" style="margin-bottom:0"><label>Bis</label><input type="date" id="exp-to"></div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-s" id="btn-exp-xls">
-        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Excel exportieren
-      </button>
-      <button class="btn" id="btn-exp-json">
-        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        JSON exportieren
-      </button>
     </div>
   </div>
 
   <!-- IMPORT -->
   <div class="card">
-    <div class="stitle">Datei importieren</div>
-    <div class="drop-zone" id="drop-zone">
-      <svg style="width:32px;height:32px;stroke:var(--t3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;margin:0 auto 10px" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-      <div style="font-size:14px;font-weight:600;color:var(--t1)">Datei hier ablegen</div>
-      <div style="font-size:12px;color:var(--t3);margin-top:4px">oder klicken zum Auswählen (.xlsx, .xls, .csv, .json)</div>
-    </div>
+    <div class="stitle" data-i18n="s.import">Datei importieren</div>
+    <p style="font-size:12px;color:var(--t3);margin-bottom:12px" data-i18n="s.importFormats">Unterstützte Formate: .xlsx, .xls, .csv, .json</p>
+    <button class="btn btn-p" id="btn-imp-open">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span data-i18n="s.importBtn">Datei auswählen</span>
+    </button>
     <input type="file" id="file-in" accept=".xlsx,.xls,.csv,.json,application/json">
-    <p style="font-size:12px;color:var(--t3);margin-top:10px;line-height:1.7">
-      <strong style="color:var(--t2)">Format:</strong> Erste Zeile = Uhrenmarken als Spaltenköpfe. Erste Spalte = Datum pro Zeile. Zellen mit <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">x</code>, <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">1</code> oder <code style="background:var(--bg3);padding:1px 5px;border-radius:4px;font-size:11px">ja</code> = getragen.
-    </p>
-    <div class="schema-wrap">
-      <div class="schema-row"><div class="sc sh">Datum</div><div class="sc sh">Rolex Sub</div><div class="sc sh">Omega Speed</div><div class="sc sh">Tudor BB</div></div>
-      <div class="schema-row"><div class="sc">2025-01-01</div><div class="sc" style="color:var(--green);font-weight:700">x</div><div class="sc"></div><div class="sc"></div></div>
-      <div class="schema-row"><div class="sc">2025-01-02</div><div class="sc"></div><div class="sc" style="color:var(--green);font-weight:700">x</div><div class="sc"></div></div>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-p" id="btn-imp-open">
-        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Datei auswählen
-      </button>
-      <button class="btn" id="btn-template">
-        <svg class="ico" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Vorlage herunterladen
-      </button>
-      <button class="btn" id="btn-demo-data" style="border-color:var(--accent);color:var(--accent)">
-        <svg class="ico" viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        Demo-Daten laden
-      </button>
-    </div>
   </div>
 
   <div id="imp-preview" style="display:none">
     <div class="card">
-      <div class="stitle">Import-Vorschau</div>
+      <div class="stitle" data-i18n="imp.preview">Import-Vorschau</div>
       <div id="imp-stats" style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px"></div>
       <div style="overflow-x:auto"><table class="tbl" id="imp-table"></table></div>
     </div>
     <div class="card">
-      <div class="stitle">Import-Optionen</div>
+      <div class="stitle" data-i18n="imp.options">Import-Optionen</div>
       <div style="display:flex;gap:6px;margin-bottom:14px">
-        <label class="imp-mode-opt imp-mode-sel" style="flex:1"><input type="radio" name="imp-mode" value="merge" checked><div style="font-weight:600;margin-bottom:2px">Zusammenführen</div><div>Bestehende Einträge behalten</div></label>
-        <label class="imp-mode-opt" style="flex:1"><input type="radio" name="imp-mode" value="replace"><div style="font-weight:600;margin-bottom:2px">Ersetzen</div><div>Alle Logs löschen &amp; neu aufbauen</div></label>
+        <label class="imp-mode-opt imp-mode-sel" style="flex:1"><input type="radio" name="imp-mode" value="merge" checked><div style="font-weight:600;margin-bottom:2px" data-i18n="imp.merge">Zusammenführen</div><div data-i18n="imp.mergeDesc">Bestehende Einträge behalten</div></label>
+        <label class="imp-mode-opt" style="flex:1"><input type="radio" name="imp-mode" value="replace"><div style="font-weight:600;margin-bottom:2px" data-i18n="imp.replace">Ersetzen</div><div data-i18n="imp.replaceDesc">Alle Logs löschen &amp; neu aufbauen</div></label>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-s" id="btn-do-import">
           <svg class="ico" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Jetzt importieren
+          <span data-i18n="imp.doImport">Jetzt importieren</span>
         </button>
         <button class="btn" id="btn-reset-import">
           <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Abbrechen
+          <span data-i18n="m.cancel">Abbrechen</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- PURGE -->
-  <div class="card" style="border-color:#3a1818">
-    <div class="stitle" style="color:var(--red)">Daten löschen</div>
-    <p style="font-size:12px;color:var(--t3);margin-bottom:12px;line-height:1.6">Löscht alle Uhren, Einträge und Preishistorien unwiderruflich.</p>
-    <button class="btn btn-d" id="btn-purge">
-      <svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-      Alle Daten löschen
-    </button>
-  </div>
-
   <div id="imp-done" style="display:none">
     <div class="card">
-      <div class="stitle">Import abgeschlossen</div>
+      <div class="stitle" data-i18n="imp.done">Import abgeschlossen</div>
       <div id="imp-done-msg"></div>
       <div id="imp-result-list" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden"></div>
       <div style="margin-top:12px;display:flex;gap:8px">
         <button class="btn btn-p" id="btn-reset-import2">
           <svg class="ico" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Weiteren Import
+          <span data-i18n="imp.more">Weiteren Import</span>
         </button>
         <button class="btn btn-s" id="btn-go-stats">
           <svg class="ico" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Statistiken ansehen
+          <span data-i18n="imp.goStats">Statistiken ansehen</span>
         </button>
       </div>
     </div>
   </div>
+
+  <!-- DATEN -->
+  <div class="card">
+    <div class="stitle" data-i18n="s.data">Daten</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn" id="btn-demo-data" style="border-color:var(--accent);color:var(--accent);justify-content:center">
+        <svg class="ico" viewBox="0 0 24 24" style="stroke:var(--accent)"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span data-i18n="s.testData">Testdaten laden</span>
+      </button>
+      <button class="btn btn-d" id="btn-purge" style="justify-content:center">
+        <svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <span data-i18n="s.deleteAll">Alle Daten löschen</span>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /settings-wrap -->
 </div>
 
-<!-- PROFIL -->
-<div id="tab-profil" class="tab">
-  <div class="card">
-    <div style="display:flex;align-items:center;gap:13px;margin-bottom:12px">
-      <div style="width:46px;height:46px;border-radius:12px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-        <svg style="width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
-      </div>
-      <div>
-        <div style="font-size:17px;font-weight:700;color:var(--t1)">Uhrentracker</div>
-        <div style="font-size:12px;color:var(--t3)">Dein persönliches Uhrenlogbuch</div>
-      </div>
-    </div>
-    <p style="font-size:13px;color:var(--t2);line-height:1.7">Halte täglich fest, welche Uhr du trägst. Entdecke Muster in deiner Sammlung, sieh deinen Streak wachsen und exportiere alles als Excel oder JSON.</p>
-  </div>
-  <div class="card">
-    <div class="stitle">Dein Name</div>
-    <div class="fg" style="margin-bottom:0"><input type="text" id="profil-name" placeholder="Name eingeben …" maxlength="60"></div>
-  </div>
-  <div class="card">
-    <div class="stitle">Deine Sammlung</div>
-    <div class="metric-grid" id="profil-metrics"></div>
-  </div>
-</div>
 
 <!-- MODALS -->
 <div class="modal-wrap" id="modal-watch">
   <div class="modal">
-    <h3>Uhr bearbeiten</h3>
+    <h3 data-i18n="m.editWatch">Uhr bearbeiten</h3>
     <input type="hidden" id="edit-wi">
-    <div class="fg"><label>Name / Modell</label><input type="text" id="edit-wname"></div>
-    <div class="fg"><label>Marke</label><input type="text" id="edit-wbrand"></div>
-    <div class="fg"><label>Referenznummer (optional)</label><input type="text" id="edit-wref" placeholder="126610LN"></div>
+    <div class="fg"><label data-i18n="w.name">Name / Modell</label><input type="text" id="edit-wname"></div>
+    <div class="fg"><label data-i18n="w.brand">Marke</label><input type="text" id="edit-wbrand"></div>
+    <div class="fg"><label data-i18n="w.ref">Referenznummer (optional)</label><input type="text" id="edit-wref" placeholder="126610LN"></div>
     <div class="frow">
-      <div class="fg"><label>Kaufdatum (optional)</label><input type="date" id="edit-wpdate"></div>
-      <div class="fg"><label>Kaufpreis € (optional)</label><input type="number" id="edit-wprice" placeholder="12000" min="0" step="1"></div>
+      <div class="fg"><label data-i18n="w.purchDate">Kaufdatum (optional)</label><input type="date" id="edit-wpdate"></div>
+      <div class="fg"><label data-i18n="w.price">Kaufpreis € (optional)</label><input type="number" id="edit-wprice" placeholder="12000" min="0" step="1"></div>
     </div>
     <div class="mfoot">
-      <button class="btn" id="btn-cancel-watch">Abbrechen</button>
-      <button class="btn btn-p" id="btn-save-watch">Speichern</button>
+      <button class="btn" id="btn-cancel-watch" data-i18n="m.cancel">Abbrechen</button>
+      <button class="btn btn-p" id="btn-save-watch" data-i18n="m.save">Speichern</button>
     </div>
   </div>
 </div>
 <div class="modal-wrap" id="modal-log">
   <div class="modal">
-    <h3>Eintrag bearbeiten</h3>
+    <h3 data-i18n="m.editLog">Eintrag bearbeiten</h3>
     <input type="hidden" id="edit-li">
-    <div class="fg"><label>Datum</label><input type="date" id="edit-ldate"></div>
-    <div class="fg"><label>Uhr</label><select id="edit-lwatch"></select></div>
-    <div class="fg"><label>Notiz</label><input type="text" id="edit-lnote"></div>
+    <div class="fg"><label data-i18n="st.date">Datum</label><input type="date" id="edit-ldate"></div>
+    <div class="fg"><label data-i18n="nav.watches">Uhr</label><select id="edit-lwatch"></select></div>
+    <div class="fg"><label data-i18n="st.note">Notiz</label><input type="text" id="edit-lnote"></div>
     <div class="mfoot">
-      <button class="btn" id="btn-cancel-log">Abbrechen</button>
-      <button class="btn btn-p" id="btn-save-log">Speichern</button>
+      <button class="btn" id="btn-cancel-log" data-i18n="m.cancel">Abbrechen</button>
+      <button class="btn btn-p" id="btn-save-log" data-i18n="m.save">Speichern</button>
     </div>
   </div>
 </div>
 <div class="modal-wrap" id="modal-price">
   <div class="modal" style="width:320px">
-    <h3 id="modal-price-title">Preishistorie</h3>
+    <h3 id="modal-price-title"></h3>
     <input type="hidden" id="price-wi">
     <div id="price-history-list" style="max-height:190px;overflow-y:auto;margin-bottom:12px;border:1px solid var(--border);border-radius:var(--rs)"></div>
-    <div class="stitle">Neuen Preis eintragen</div>
+    <div class="stitle" data-i18n="m.priceNew">Neuen Preis eintragen</div>
     <div style="display:flex;gap:6px;margin-bottom:8px">
-      <button class="pill active" data-ptype="used" style="flex:1;justify-content:center">Gebraucht</button>
-      <button class="pill" data-ptype="new" style="flex:1;justify-content:center">Neu</button>
+      <button class="pill active" data-ptype="used" style="flex:1;justify-content:center" data-i18n="m.used">Gebraucht</button>
+      <button class="pill" data-ptype="new" style="flex:1;justify-content:center" data-i18n="m.new">Neu</button>
     </div>
     <div class="frow" style="margin-bottom:0">
-      <div class="fg" style="margin-bottom:8px"><label>Datum</label><input type="date" id="new-price-date"></div>
-      <div class="fg" style="margin-bottom:8px"><label>Preis €</label><input type="number" id="new-price-val" placeholder="14000" min="0" step="1"></div>
+      <div class="fg" style="margin-bottom:8px"><label data-i18n="st.date">Datum</label><input type="date" id="new-price-date"></div>
+      <div class="fg" style="margin-bottom:8px"><label data-i18n="m.priceLabel">Preis €</label><input type="number" id="new-price-val" placeholder="14000" min="0" step="1"></div>
     </div>
     <div class="mfoot">
-      <button class="btn" id="btn-cancel-price">Schließen</button>
-      <button class="btn btn-p" id="btn-add-price-entry">Hinzufügen</button>
+      <button class="btn" id="btn-cancel-price" data-i18n="m.close">Schließen</button>
+      <button class="btn btn-p" id="btn-add-price-entry" data-i18n="m.add">Hinzufügen</button>
     </div>
   </div>
 </div>
@@ -418,12 +471,31 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 
 <div class="modal-wrap" id="modal-purge">
   <div class="modal">
-    <h3 style="color:var(--red)">Alle Daten löschen?</h3>
-    <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:4px">Diese Aktion löscht alle Uhren, Einträge und Preishistorien unwiderruflich.</p>
-    <p style="font-size:12px;color:var(--t3);line-height:1.6">Sie kann <strong>nicht</strong> rückgängig gemacht werden.</p>
+    <h3 style="color:var(--red)" data-i18n="m.purgeTitle">Alle Daten löschen?</h3>
+    <p style="font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:4px" data-i18n="m.purgeDesc">Diese Aktion löscht alle Uhren, Einträge und Preishistorien unwiderruflich.</p>
+    <p style="font-size:12px;color:var(--t3);line-height:1.6" data-i18n="m.purgeWarn">Sie kann nicht rückgängig gemacht werden.</p>
     <div class="mfoot">
-      <button class="btn" id="btn-purge-cancel">Abbrechen</button>
-      <button class="btn btn-d" id="btn-purge-confirm">Alle Daten löschen</button>
+      <button class="btn" id="btn-purge-cancel" data-i18n="m.cancel">Abbrechen</button>
+      <button class="btn btn-d" id="btn-purge-confirm" data-i18n="m.purgeConfirm">Alle Daten löschen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-wrap" id="modal-about">
+  <div class="modal about-modal">
+    <div class="about-icon">
+      <svg style="width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+    </div>
+    <h3 style="text-align:center;margin-bottom:12px" data-i18n="about.title">Watchtracker</h3>
+    <p data-i18n="about.desc1">Dein persönliches Logbuch für Uhren. Halte täglich fest, welche Uhr du trägst, und beobachte über Statistiken und Heatmaps wie sich deine Tragegewohnheiten entwickeln.</p>
+    <p data-i18n="about.desc2">Verwalte deine Sammlung, pflege Kaufpreise und verfolge die Wertentwicklung deiner Uhren — alles lokal in deinem Browser gespeichert, ohne Konto oder Cloud.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px">
+      <span style="font-size:11px;color:var(--t3);background:var(--bg3);padding:3px 9px;border-radius:20px;border:1px solid var(--border)" data-i18n="about.tag1">Lokal & privat</span>
+      <span style="font-size:11px;color:var(--t3);background:var(--bg3);padding:3px 9px;border-radius:20px;border:1px solid var(--border)" data-i18n="about.tag2">Kein Account nötig</span>
+      <span style="font-size:11px;color:var(--t3);background:var(--bg3);padding:3px 9px;border-radius:20px;border:1px solid var(--border)" data-i18n="about.tag3">Export als Excel & JSON</span>
+    </div>
+    <div class="mfoot" style="margin-top:18px">
+      <button class="btn btn-p" id="btn-about-close" data-i18n="m.close" style="width:100%">Schließen</button>
     </div>
   </div>
 </div>
@@ -433,8 +505,98 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 <script>
 // ── Storage ───────────────────────────────────────────────
 function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.warn('Storage quota exceeded',e);}}
 function saveAll(){sv('wt_w',watches);sv('wt_l',logs);}
+
+// ── i18n ──────────────────────────────────────────────────
+var curLang=ld('wt_lang','de');
+var LANG={
+  de:{
+    'app.title':'Watchtracker',
+    'nav.overview':'Uhr tracken','nav.watches':'Uhren','nav.log':'Logbuch','nav.stats':'Statistiken','nav.settings':'Einstellungen',
+    'p.sub':'Dein persönliches Uhrenlogbuch','p.desc':'Halte täglich fest, welche Uhr du trägst. Entdecke Muster in deiner Sammlung, sieh deinen Streak wachsen und exportiere alles als Excel oder JSON.',
+    'p.greet':'Willkommen!','p.greetName':'Willkommen zurück, {n}!',
+    's.nameTitle':'Dein Name','s.namePh':'Name eingeben …','s.nameHint':'Wird in Willkommensnachrichten verwendet.',
+    's.xlsDesc':'Uhren, Logeinträge und Preishistorie — ideal für Auswertungen.','s.jsonDesc':'Vollständiger Datenexport — maschinenlesbar, ideal für Backups.',
+    'st.title':'Uhr tracken','st.todayQ':'Welche Uhr trägst du heute?','st.date':'Datum','st.watchSel':'Uhr auswählen','st.watchOpt':'— Uhr wählen —','st.note':'Notiz (optional)','st.notePh':'z.B. Hochzeit, Bürotag, Wanderung …','st.logBtn':'Eintragen','st.todayCard':'Heute eingetragen','st.recent':'Letzte Tage',
+    'st.noEntryToday':'Noch kein Eintrag für heute.','st.noEntryYest':'Gestern ({d}) fehlt noch ein Eintrag.','st.goodDay':'Guten Tag, {n}.','st.today':'Heute','st.noEntry':'Kein Eintrag','st.logAlert':'Bitte Datum und Uhr auswählen.',
+    'w.addTitle':'Neue Uhr hinzufügen','w.name':'Name / Modell','w.brand':'Marke','w.ref':'Referenznummer (optional)','w.price':'Kaufpreis € (optional)','w.purchDate':'Kaufdatum (optional)','w.addBtn':'Hinzufügen',
+    'w.alert':'Bitte Name und Marke eingeben.','w.deleteConfirm':'Uhr "{n}" und alle Einträge löschen?',
+    'l.title':'Alle Einträge','l.deleteConfirm':'Diesen Eintrag löschen?',
+    'g.deleted':'Gelöschte Uhr','g.sheetName':'Uhrenlogbuch','g.filename':'uhrenlogbuch','g.total':'SUMME',
+    'stat.wearing':'Trageverhalten','stat.freq':'Häufigkeit pro Uhr','stat.timeline':'Zeitverlauf — letzte 30 Tage','stat.timelineYear':'Zeitverlauf {y} (monatlich)','stat.dist':'Verteilung','stat.price':'Preisentwicklung','stat.priceEmpty':'Kaufpreis bei einer Uhr hinterlegen oder über € Preiseinträge erfassen.',
+    'stat.all':'Alle','stat.allWatches':'Alle Uhren','stat.entries':'Einträge','stat.share':'Anteil','stat.daysworn':'Tage getragen','stat.ofDays':'aller Tage','stat.total':'gesamt',
+    'stat.noData':'Keine Daten für diese Auswahl.','stat.noDataYet':'Noch keine Daten vorhanden.',
+    'stat.heatEntry':' Eintrag','stat.heatEntries':' Einträge','stat.less':'Weniger','stat.more':'Mehr',
+    'stat.noPriceWatch':'Keine Preisdaten für diese Uhr.','stat.noPricePeriod':'Keine Preisdaten für diesen Zeitraum.',
+    'stat.purchasePrice':'Kaufpreis','stat.valueUsed':'Werterhalt getragen','stat.valueNew':'Werterhalt ungetragen','stat.vsCost':'% vs. Kauf','stat.priceHistory':'Preishistorie',
+    's.display':'Darstellung','s.darkMode':'Dunkles Design','s.brand':'Farbschema','s.language':'Sprache','s.export':'Daten exportieren','s.exportXls':'Excel (.xlsx)','s.exportJson':'JSON','s.import':'Datei importieren','s.importFormats':'Unterstützte Formate: .xlsx, .xls, .csv, .json','s.importBtn':'Datei auswählen','s.data':'Daten','s.testData':'Testdaten laden','s.deleteAll':'Alle Daten löschen','s.nameTitle':'Dein Name','s.namePh':'Name eingeben …','s.nameHint':'Wird in Willkommensnachrichten verwendet.','s.xlsDesc':'Uhren, Logeinträge und Preishistorie — ideal für Auswertungen.','s.jsonDesc':'Vollständiger Datenexport — maschinenlesbar, ideal für Backups.',
+    's.demoConfirm':'Demo-Daten laden?\n\nAlle vorhandenen Uhren und Einträge werden gelöscht und durch Testdaten ersetzt.\n\nFortfahren?','s.exportAlert':'Keine Einträge zum Exportieren.',
+    'imp.preview':'Import-Vorschau','imp.options':'Import-Optionen','imp.merge':'Zusammenführen','imp.mergeDesc':'Bestehende Einträge behalten','imp.replace':'Ersetzen','imp.replaceDesc':'Alle Logs löschen & neu aufbauen','imp.doImport':'Jetzt importieren','imp.cancel':'Abbrechen','imp.done':'Import abgeschlossen','imp.more':'Weiteren Import','imp.goStats':'Statistiken ansehen',
+    'imp.fileTooLarge':'Datei zu groß (max. 5 MB).','imp.invalidJson':'Ungültiges JSON-Format.','imp.fileEmpty':'Datei leer.','imp.error':'Fehler: {msg}',
+    'imp.badgeEntries':'{n} Einträge','imp.badgeWatches':'{n} Uhren','imp.badgeDays':'{n} Tage','imp.badgeDatesUnclear':'{n} Datum unklar','imp.badgeSkipped':'{n} übersprungen',
+    'imp.colDate':'Datum','imp.colWatch':'Uhr','imp.colStatus':'Status','imp.andMore':'… und {n} weitere',
+    'imp.statusImported':'importiert','imp.statusDupe':'Duplikat','imp.statusSkip':'übersprungen','imp.statusCheck':'prüfen',
+    'imp.doneEntries':'Einträge importiert','imp.doneNewW':'neue Uhren','imp.doneDupes':'Duplikate übersprungen',
+    'm.editWatch':'Uhr bearbeiten','m.editLog':'Eintrag bearbeiten','m.cancel':'Abbrechen','m.save':'Speichern','m.close':'Schließen','m.add':'Hinzufügen','m.priceNew':'Neuen Preis eintragen','m.priceLabel':'Preis €','m.used':'Gebraucht','m.new':'Neu','m.purgeTitle':'Alle Daten löschen?','m.purgeDesc':'Diese Aktion löscht alle Uhren, Einträge und Preishistorien unwiderruflich.','m.purgeWarn':'Sie kann nicht rückgängig gemacht werden.','m.purgeConfirm':'Alle Daten löschen',
+    'm.noPriceData':'Noch keine Preisdaten.','m.purchase':'(Kauf)','m.priceHistoryTitle':'Preishistorie — {n}','m.priceAlertEmpty':'Bitte Datum und Preis eingeben.','m.priceAlertInvalid':'Ungültiger Preis.','m.watchNotFound':'Uhr nicht gefunden.',
+    'about.title':'Watchtracker','about.desc1':'Dein persönliches Logbuch für Uhren. Halte täglich fest, welche Uhr du trägst, und beobachte über Statistiken und Heatmaps wie sich deine Tragegewohnheiten entwickeln.','about.desc2':'Verwalte deine Sammlung, pflege Kaufpreise und verfolge die Wertentwicklung deiner Uhren — alles lokal in deinem Browser gespeichert, ohne Konto oder Cloud.','about.tag1':'Lokal & privat','about.tag2':'Kein Account nötig','about.tag3':'Export als Excel & JSON',
+    'wa.worn':'x getragen','wa.edit':'Bearbeiten','wa.delete':'Löschen',
+    'e.noWatches':'Noch keine Uhren. Füge deine erste Uhr hinzu.','e.noLogs':'Noch keine Einträge vorhanden.',
+    'met.watches':'Uhren','met.entries':'Einträge gesamt','met.days':'Tage erfasst','met.streak':'Aktueller Streak','met.streakSub':'Tage am Stück','met.fav':'Lieblingsuhr','met.since':'Dabei seit',
+    'ob.1':'Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.',
+    'ob.2':'Wähle oben eine Uhr aus und trage sie ein.',
+    'ob.3':'Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'
+  },
+  en:{
+    'app.title':'Watch Tracker',
+    'nav.overview':'Track Watch','nav.watches':'Watches','nav.log':'Log','nav.stats':'Statistics','nav.settings':'Settings',
+    'p.sub':'Your personal watch log','p.desc':'Track daily which watch you wear. Discover patterns in your collection, watch your streak grow and export everything as Excel or JSON.',
+    'p.greet':'Welcome!','p.greetName':'Welcome back, {n}!',
+    's.nameTitle':'Your Name','s.namePh':'Enter name …','s.nameHint':'Used in welcome messages.',
+    's.xlsDesc':'Watches, log entries and price history — great for analysis.','s.jsonDesc':'Full data export — machine-readable, ideal for backups.',
+    'st.title':'Track Watch','st.todayQ':'Which watch are you wearing today?','st.date':'Date','st.watchSel':'Select watch','st.watchOpt':'— Select watch —','st.note':'Note (optional)','st.notePh':'e.g. wedding, office day, hike …','st.logBtn':'Log Entry','st.todayCard':'Logged Today','st.recent':'Recent Days',
+    'st.noEntryToday':'No entry for today yet.','st.noEntryYest':'No entry for yesterday ({d}) yet.','st.goodDay':'Good day, {n}.','st.today':'Today','st.noEntry':'No entry','st.logAlert':'Please select a date and watch.',
+    'w.addTitle':'Add New Watch','w.name':'Name / Model','w.brand':'Brand','w.ref':'Reference No. (optional)','w.price':'Purchase Price € (optional)','w.purchDate':'Purchase Date (optional)','w.addBtn':'Add Watch',
+    'w.alert':'Please enter name and brand.','w.deleteConfirm':'Delete watch "{n}" and all related entries?',
+    'l.title':'All Entries','l.deleteConfirm':'Delete this entry?',
+    'g.deleted':'Deleted watch','g.sheetName':'Watch Log','g.filename':'watchlog','g.total':'TOTAL',
+    'stat.wearing':'Wearing','stat.freq':'Frequency per Watch','stat.timeline':'Timeline — last 30 days','stat.timelineYear':'Timeline {y} (monthly)','stat.dist':'Distribution','stat.price':'Price Development','stat.priceEmpty':'Add a purchase price to a watch or log price entries via €.',
+    'stat.all':'All','stat.allWatches':'All Watches','stat.entries':'Entries','stat.share':'Share','stat.daysworn':'Days worn','stat.ofDays':'of all days','stat.total':'total',
+    'stat.noData':'No data for this selection.','stat.noDataYet':'No data yet.',
+    'stat.heatEntry':' entry','stat.heatEntries':' entries','stat.less':'Less','stat.more':'More',
+    'stat.noPriceWatch':'No price data for this watch.','stat.noPricePeriod':'No price data for this period.',
+    'stat.purchasePrice':'Purchase Price','stat.valueUsed':'Value (worn)','stat.valueNew':'Value (unworn)','stat.vsCost':'% vs. cost','stat.priceHistory':'Price History',
+    's.display':'Appearance','s.darkMode':'Dark Mode','s.brand':'Color Theme','s.language':'Language','s.export':'Export Data','s.exportXls':'Excel (.xlsx)','s.exportJson':'JSON','s.import':'Import File','s.importFormats':'Supported formats: .xlsx, .xls, .csv, .json','s.importBtn':'Select File','s.data':'Data','s.testData':'Load Test Data','s.deleteAll':'Delete All Data','s.nameTitle':'Your Name','s.namePh':'Enter name …','s.nameHint':'Used in welcome messages.','s.xlsDesc':'Watches, log entries and price history — great for analysis.','s.jsonDesc':'Full data export — machine-readable, ideal for backups.',
+    's.demoConfirm':'Load demo data?\n\nAll existing watches and entries will be deleted and replaced with test data.\n\nContinue?','s.exportAlert':'No entries to export.',
+    'imp.preview':'Import Preview','imp.options':'Import Options','imp.merge':'Merge','imp.mergeDesc':'Keep existing entries','imp.replace':'Replace','imp.replaceDesc':'Delete all logs & rebuild','imp.doImport':'Import Now','imp.cancel':'Cancel','imp.done':'Import Complete','imp.more':'Import More','imp.goStats':'View Statistics',
+    'imp.fileTooLarge':'File too large (max. 5 MB).','imp.invalidJson':'Invalid JSON format.','imp.fileEmpty':'Empty file.','imp.error':'Error: {msg}',
+    'imp.badgeEntries':'{n} entries','imp.badgeWatches':'{n} watches','imp.badgeDays':'{n} days','imp.badgeDatesUnclear':'{n} unclear dates','imp.badgeSkipped':'{n} skipped',
+    'imp.colDate':'Date','imp.colWatch':'Watch','imp.colStatus':'Status','imp.andMore':'… and {n} more',
+    'imp.statusImported':'imported','imp.statusDupe':'duplicate','imp.statusSkip':'skipped','imp.statusCheck':'check',
+    'imp.doneEntries':'entries imported','imp.doneNewW':'new watches','imp.doneDupes':'duplicates skipped',
+    'm.editWatch':'Edit Watch','m.editLog':'Edit Entry','m.cancel':'Cancel','m.save':'Save','m.close':'Close','m.add':'Add','m.priceNew':'Add New Price','m.priceLabel':'Price €','m.used':'Used','m.new':'New','m.purgeTitle':'Delete All Data?','m.purgeDesc':'This action permanently deletes all watches, entries and price history.','m.purgeWarn':'It cannot be undone.','m.purgeConfirm':'Delete All Data',
+    'm.noPriceData':'No price data yet.','m.purchase':'(Purchase)','m.priceHistoryTitle':'Price History — {n}','m.priceAlertEmpty':'Please enter a date and price.','m.priceAlertInvalid':'Invalid price.','m.watchNotFound':'Watch not found.',
+    'about.title':'Watch Tracker','about.desc1':'Your personal watch logbook. Record which watch you wear each day and discover your wearing habits through statistics and heatmaps.','about.desc2':'Manage your collection, track purchase prices and monitor value trends — all stored locally in your browser, no account or cloud required.','about.tag1':'Local & private','about.tag2':'No account needed','about.tag3':'Export as Excel & JSON',
+    'wa.worn':'x worn','wa.edit':'Edit','wa.delete':'Delete',
+    'e.noWatches':'No watches yet. Add your first watch.','e.noLogs':'No entries yet.',
+    'met.watches':'Watches','met.entries':'Total entries','met.days':'Days tracked','met.streak':'Current streak','met.streakSub':'days in a row','met.fav':'Favourite watch','met.since':'Member since',
+    'ob.1':'Go to <strong style="color:var(--t1)">Watches</strong> and add your first watch.',
+    'ob.2':'Select a watch above and log it daily.',
+    'ob.3':'Your <strong style="color:var(--t1)">Statistics</strong> grow automatically.'
+  }
+};
+function t(k){return (LANG[curLang]||LANG.de)[k]||k;}
+function applyLang(){
+  var l=LANG[curLang]||LANG.de;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k=el.getAttribute('data-i18n');if(l[k]!==undefined)el.textContent=l[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+    var k=el.getAttribute('data-i18n-ph');if(l[k]!==undefined)el.placeholder=l[k];
+  });
+  document.title=t('app.title');
+}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
@@ -471,7 +633,7 @@ var impEntries=[];
 var impJsonData=null;
 var barC,lineC,pieC,priceC;
 
-var COLORS=['#4f8ef7','#2ecc8a','#f87171','#fbbf24','#a78bfa','#34d399','#f472b6','#67e8f9','#fb923c','#93c5fd'];
+var COLORS=['#e8b84b','#f87171','#a78bfa','#67e8f9','#fb923c','#f472b6','#34d399','#fbbf24','#93c5fd','#2ecc8a'];
 
 var WEEKDAYS=['So','Mo','Di','Mi','Do','Fr','Sa'];
 var MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -479,12 +641,6 @@ var MONTHS=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','
 function todayStr(){return new Date().toISOString().slice(0,10);}
 document.getElementById('log-date').value=todayStr();
 
-// Init export date range: current year
-(function(){
-  var y=new Date().getFullYear();
-  document.getElementById('exp-from').value=y+'-01-01';
-  document.getElementById('exp-to').value=todayStr();
-})();
 
 // ── Helpers ───────────────────────────────────────────────
 function formatDate(str){
@@ -496,7 +652,7 @@ function isToday(str){return str===todayStr();}
 function populateSel(id,cur){
   var s=document.getElementById(id);
   var v=cur||s.value;
-  s.innerHTML='<option value="">— Uhr wählen —</option>';
+  s.innerHTML='<option value="">'+t('st.watchOpt')+'</option>';
   watches.forEach(function(w){
     var o=document.createElement('option');
     o.value=w.id;o.textContent=w.name+' – '+w.brand;
@@ -506,29 +662,37 @@ function populateSel(id,cur){
 }
 
 function brandBadge(brand,idx){
+  var light=document.documentElement.getAttribute('data-theme')==='light';
   var known={
-    rolex:{bg:'#0a1f0a',color:'#4ade80',border:'#1a4a1a',abbr:'RLX'},
-    omega:{bg:'#0a0f2a',color:'#7eb3f5',border:'#1a2a5e',abbr:'OMG'},
-    tudor:{bg:'#1a0a0a',color:'#f87171',border:'#4a1a1a',abbr:'TDR'},
-    seiko:{bg:'#0a1a2a',color:'#67e8f9',border:'#0a3040',abbr:'SEI'},
-    patek:{bg:'#1a1500',color:'#fbbf24',border:'#4a3800',abbr:'PP'},
-    iwc:{bg:'#100a2a',color:'#a78bfa',border:'#2a1a50',abbr:'IWC'},
-    breitling:{bg:'#0a1a28',color:'#93c5fd',border:'#0a3050',abbr:'BRT'},
-    ap:{bg:'#0a1a10',color:'#34d399',border:'#0a3820',abbr:'AP'},
-    jaeger:{bg:'#1a0a18',color:'#f472b6',border:'#40103a',abbr:'JLC'},
+    rolex:{  dk:{bg:'#0a1f0a',color:'#4ade80',border:'#1a4a1a'},  lt:{bg:'#e8f5e8',color:'#1a6b2a',border:'#a8d8a8'}, abbr:'RLX'},
+    omega:{  dk:{bg:'#0a0f2a',color:'#7eb3f5',border:'#1a2a5e'},  lt:{bg:'#e8eefa',color:'#1a3a8a',border:'#a8b8e8'}, abbr:'OMG'},
+    tudor:{  dk:{bg:'#1a0a0a',color:'#f87171',border:'#4a1a1a'},  lt:{bg:'#fde8e8',color:'#b02020',border:'#f0a8a8'}, abbr:'TDR'},
+    seiko:{  dk:{bg:'#0a1a2a',color:'#67e8f9',border:'#0a3040'},  lt:{bg:'#e0f6fa',color:'#0a6070',border:'#90d8e8'}, abbr:'SEI'},
+    patek:{  dk:{bg:'#1a1500',color:'#fbbf24',border:'#4a3800'},  lt:{bg:'#fef8e0',color:'#8a6000',border:'#e8d078'}, abbr:'PP'},
+    iwc:{    dk:{bg:'#100a2a',color:'#a78bfa',border:'#2a1a50'},  lt:{bg:'#f0ecff',color:'#5828c8',border:'#c8b0f0'}, abbr:'IWC'},
+    breitling:{dk:{bg:'#0a1a28',color:'#93c5fd',border:'#0a3050'},lt:{bg:'#e8f0fa',color:'#1850a0',border:'#a0c0e8'}, abbr:'BRT'},
+    ap:{     dk:{bg:'#0a1a10',color:'#34d399',border:'#0a3820'},  lt:{bg:'#e8f8f0',color:'#0a7040',border:'#88d0b0'}, abbr:'AP'},
+    jaeger:{ dk:{bg:'#1a0a18',color:'#f472b6',border:'#40103a'},  lt:{bg:'#fde8f8',color:'#a0207a',border:'#e8a0d0'}, abbr:'JLC'},
   };
   var key=brand.toLowerCase().replace(/[\s\-]/g,'');
   var match=null;
   for(var k in known){if(key.indexOf(k)!==-1){match=known[k];break;}}
   var fallbacks=[
-    {bg:'#1a1f2e',color:'#7eb3f5',border:'#2a3a5e'},
-    {bg:'#1a2a1a',color:'#4ade80',border:'#2d5a2d'},
-    {bg:'#2a1a1a',color:'#f87171',border:'#5a2a2a'},
-    {bg:'#2a2210',color:'#fbbf24',border:'#5a4a10'},
-    {bg:'#1e1a2e',color:'#a78bfa',border:'#3a2a5e'},
+    {dk:{bg:'#1a1f2e',color:'#7eb3f5',border:'#2a3a5e'},lt:{bg:'#eaeffa',color:'#1a3a8a',border:'#a8b8e0'}},
+    {dk:{bg:'#1a2a1a',color:'#4ade80',border:'#2d5a2d'},lt:{bg:'#eaf5ea',color:'#1a6a2a',border:'#a0d0a0'}},
+    {dk:{bg:'#2a1a1a',color:'#f87171',border:'#5a2a2a'},lt:{bg:'#fdeaea',color:'#b02020',border:'#f0a0a0'}},
+    {dk:{bg:'#2a2210',color:'#fbbf24',border:'#5a4a10'},lt:{bg:'#fef5e0',color:'#8a5800',border:'#e0c060'}},
+    {dk:{bg:'#1e1a2e',color:'#a78bfa',border:'#3a2a5e'},lt:{bg:'#f0ecff',color:'#5020c0',border:'#c0a8f0'}},
   ];
-  var s=match||(fallbacks[idx%fallbacks.length]);
-  var abbr=match?match.abbr:(brand.slice(0,3).toUpperCase()||'—');
+  var s, abbr;
+  if(match){
+    s=light?match.lt:match.dk;
+    abbr=match.abbr;
+  } else {
+    var fb=fallbacks[idx%fallbacks.length];
+    s=light?fb.lt:fb.dk;
+    abbr=brand.slice(0,3).toUpperCase()||'—';
+  }
   return '<div class="brand-badge" style="background:'+s.bg+';color:'+s.color+';border:1px solid '+s.border+'">'+esc(abbr)+'</div>';
 }
 
@@ -545,7 +709,7 @@ document.getElementById('app').addEventListener('click',function(e){
   if(t==='stats')renderStats();
   if(t==='log')renderLog();
   if(t==='uhren')renderWatches();
-  if(t==='profil')renderProfil();
+  if(t==='settings')renderSettings();
 });
 
 // ── STARTSEITE & HEUTE ────────────────────────────────────
@@ -555,6 +719,22 @@ function renderStart(){
   var name=ld('wt_name','');
 
   populateSel('log-watch');
+
+  // Welcome card
+  var wEl=document.getElementById('start-welcome');
+  var greeting=name?t('p.greetName').replace('{n}',esc(name)):t('p.greet');
+  if(!watches.length&&!logs.length){
+    wEl.innerHTML='<div class="card welcome-card">'+
+      '<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'+
+      '<div class="welcome-card-icon">'+
+      '<svg style="width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></div>'+
+      '<div><div style="font-size:15px;font-weight:700;color:var(--t1)">'+greeting+'</div>'+
+      '<div style="font-size:12px;color:var(--t3)">'+t('p.sub')+'</div></div></div>'+
+      '<p style="font-size:13px;color:var(--t2);line-height:1.7;margin:0">'+t('p.desc')+'</p>'+
+      '</div>';
+  } else {
+    wEl.innerHTML='<div style="font-size:13px;color:var(--t3);margin-bottom:8px;padding:0 2px">'+greeting+'</div>';
+  }
 
   // Today-card (always rendered regardless of state)
   var tl=logs.filter(function(l){return l.date===today;});
@@ -573,16 +753,20 @@ function renderStart(){
     }).join('');
   }
 
-  // Empty-state onboarding
-  if(!watches.length&&!logs.length){
+  // Show/hide form and recent section based on whether watches exist
+  var hasWatches=watches.length>0;
+  document.getElementById('log-form-card').style.display=hasWatches?'':'none';
+  document.getElementById('recent-label').style.display=hasWatches?'':'none';
+
+  // Empty-state onboarding (no watches at all)
+  if(!hasWatches){
     ra.innerHTML='';
     document.getElementById('start-metrics').innerHTML=
-      '<div class="metric" style="grid-column:1/-1;background:rgba(79,142,247,.06);border-color:rgba(79,142,247,.2)">'+
-      '<div style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:10px">'+(name?'Willkommen, '+esc(name)+'!':'Willkommen beim Uhrentracker!')+'</div>'+
+      '<div class="metric" style="grid-column:1/-1;background:var(--bg2)">'+
       '<div style="font-size:13px;color:var(--t2);line-height:2">'+
-      '<span style="color:var(--accent);font-weight:700">1.</span> Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.<br>'+
-      '<span style="color:var(--accent);font-weight:700">2.</span> Wähle oben eine Uhr aus und trage sie ein.<br>'+
-      '<span style="color:var(--accent);font-weight:700">3.</span> Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'+
+      '<span style="color:var(--accent);font-weight:700">1.</span> '+t('ob.1')+'<br>'+
+      '<span style="color:var(--accent);font-weight:700">2.</span> '+t('ob.2')+'<br>'+
+      '<span style="color:var(--accent);font-weight:700">3.</span> '+t('ob.3')+
       '</div></div>';
     document.getElementById('start-days').innerHTML='';
     return;
@@ -593,19 +777,19 @@ function renderStart(){
   var ys=yest.toISOString().slice(0,10);
   var h='';
   if(!logs.some(function(l){return l.date===today;}))
-    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'+(name?esc(name)+': Noch':'Noch')+' kein Eintrag für heute.</div>';
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>'+(name?esc(name)+': ':'')+t('st.noEntryToday')+'</div>';
   if(logs.length>0&&!logs.some(function(l){return l.date===ys;}))
-    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Gestern ('+ys+') fehlt noch ein Eintrag.</div>';
-  if(!h&&name)h='<div style="font-size:13px;color:var(--t3);margin-bottom:8px">Guten Tag, <strong style="color:var(--t2)">'+esc(name)+'</strong>.</div>';
+    h+='<div class="reminder"><svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'+t('st.noEntryYest').replace('{d}',ys)+'</div>';
+  if(!h&&name)h='<div style="font-size:13px;color:var(--t3);margin-bottom:8px">'+t('st.goodDay').replace('{n}','<strong style="color:var(--t2)">'+esc(name)+'</strong>')+'</div>';
   ra.innerHTML=h;
 
   // Metriken
   var m=getMetrics();
   document.getElementById('start-metrics').innerHTML=
-    '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+m.days+'</div></div>'+
-    '<div class="metric"><div class="ml">Streak</div><div class="mv">'+m.streak+'</div><div class="ms">Tage am Stück</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>';
+    '<div class="metric"><div class="ml">'+t('met.entries')+'</div><div class="mv">'+logs.length+'</div></div>'+
+    '<div class="metric"><div class="ml">'+t('met.days')+'</div><div class="mv">'+m.days+'</div></div>'+
+    '<div class="metric"><div class="ml">'+t('met.streak')+'</div><div class="mv">'+m.streak+'</div><div class="ms">'+t('met.streakSub')+'</div></div>'+
+    '<div class="metric"><div class="ml">'+t('met.fav')+'</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+t('wa.worn')+'</div></div>';
 
   // Letzte 5 Tage
   var filled=[];
@@ -613,11 +797,11 @@ function renderStart(){
   var html='';
   filled.forEach(function(dateStr){
     var dayLogs=logs.filter(function(l){return l.date===dateStr;}).sort(function(a,b){return a.date.localeCompare(b.date);});
-    var todayMark=isToday(dateStr)?'<span class="day-today">Heute</span>':'';
+    var todayMark=isToday(dateStr)?'<span class="day-today">'+t('st.today')+'</span>':'';
     html+='<div class="day-block">';
     html+='<div class="day-header"><div><span class="day-label">'+formatDate(dateStr)+'</span></div>'+todayMark+'</div>';
     if(dayLogs.length===0){
-      html+='<div class="day-empty">Kein Eintrag</div>';
+      html+='<div class="day-empty">'+t('st.noEntry')+'</div>';
     } else {
       dayLogs.forEach(function(l){
         var w=watches.find(function(w){return w.id===l.watchId;});
@@ -626,7 +810,7 @@ function renderStart(){
         html+='<div class="day-watch-row">';
         html+='<div class="day-dot" style="background:'+c+'"></div>';
         html+='<div style="flex:1">';
-        html+='<div style="font-size:13px;font-weight:600;color:var(--t1)">'+(w?esc(w.name)+' <span style="font-weight:400;color:var(--t3)">'+esc(w.brand)+'</span>':'Gelöschte Uhr')+'</div>';
+        html+='<div style="font-size:13px;font-weight:600;color:var(--t1)">'+(w?esc(w.name)+' <span style="font-weight:400;color:var(--t3)">'+esc(w.brand)+'</span>':t('g.deleted'))+'</div>';
         if(l.note)html+='<div style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</div>';
         html+='</div>';
         html+='</div>';
@@ -641,7 +825,7 @@ document.getElementById('btn-add-log').addEventListener('click',function(){
   var date=document.getElementById('log-date').value;
   var watchId=document.getElementById('log-watch').value;
   var note=document.getElementById('log-note').value.trim();
-  if(!date||!watchId){alert('Bitte Datum und Uhr auswählen.');return;}
+  if(!date||!watchId){alert(t('st.logAlert'));return;}
   logs.unshift({date:date,watchId:watchId,note:note,id:uid()});
   saveAll();
   document.getElementById('log-note').value='';
@@ -652,7 +836,7 @@ document.getElementById('btn-add-log').addEventListener('click',function(){
 function renderWatches(){
   populateSel('log-watch');
   var el=document.getElementById('watch-list');
-  if(!watches.length){el.innerHTML='<div class="empty">Noch keine Uhren erfasst.</div>';return;}
+  if(!watches.length){el.innerHTML='<div class="empty">'+t('e.noWatches')+'</div>';return;}
   el.innerHTML=watches.map(function(w,i){
     var count=logs.filter(function(l){return l.watchId===w.id;}).length;
     var usedPts=buildPricePoints(w,'used'),newPts=buildPricePoints(w,'new');
@@ -675,12 +859,12 @@ function renderWatches(){
       '<div style="display:flex;align-items:center">'+brandBadge(w.brand,i)+
       '<div><div style="font-size:13px;font-weight:700;color:var(--t1)">'+esc(w.name)+'</div>'+
       '<div style="font-size:11px;color:var(--t3)">'+esc(w.brand)+(w.ref?'&nbsp;·&nbsp;Ref.&nbsp;'+esc(w.ref):'')+
-      '&nbsp;&nbsp;·&nbsp;&nbsp;'+count+'x getragen'+priceInfo+'</div></div></div>'+
+      '&nbsp;&nbsp;·&nbsp;&nbsp;'+count+t('wa.worn')+priceInfo+'</div></div></div>'+
       '<div style="display:flex;gap:6px">'+
-      '<button class="btn" style="padding:6px 10px;font-size:12px;font-weight:600" data-action="price-watch" data-idx="'+i+'" title="Preishistorie" aria-label="Preishistorie">€</button>'+
-      '<button class="btn" style="padding:6px 10px" data-action="edit-watch" data-idx="'+i+'" aria-label="Bearbeiten">'+
+      '<button class="btn" style="padding:6px 10px;font-size:12px;font-weight:600" data-action="price-watch" data-idx="'+i+'" title="'+t('stat.priceHistory')+'" aria-label="'+t('stat.priceHistory')+'">€</button>'+
+      '<button class="btn" style="padding:6px 10px" data-action="edit-watch" data-idx="'+i+'" aria-label="'+t('wa.edit')+'">'+
       '<svg class="ico" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'+
-      '<button class="btn btn-d" style="padding:6px 10px" data-action="delete-watch" data-idx="'+i+'" aria-label="Löschen">'+
+      '<button class="btn btn-d" style="padding:6px 10px" data-action="delete-watch" data-idx="'+i+'" aria-label="'+t('wa.delete')+'">'+
       '<svg class="ico" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>'+
       '</div></div>';
   }).join('');
@@ -689,7 +873,7 @@ function renderWatches(){
 document.getElementById('btn-add-watch').addEventListener('click',function(){
   var name=document.getElementById('w-name').value.trim();
   var brand=document.getElementById('w-brand').value.trim();
-  if(!name||!brand){alert('Bitte Name und Marke eingeben.');return;}
+  if(!name||!brand){alert(t('w.alert'));return;}
   var ref=document.getElementById('w-ref').value.trim();
   var pdate=document.getElementById('w-pdate').value;
   var pprice=document.getElementById('w-price').value;
@@ -723,7 +907,7 @@ document.getElementById('watch-list').addEventListener('click',function(e){
     document.getElementById('edit-wprice').value=watches[idx].purchasePrice||'';
     document.getElementById('modal-watch').classList.add('open');
   } else if(action==='delete-watch'){
-    if(!confirm('Uhr "'+watches[idx].name.replace(/\n/g,' ')+'" und alle zugehörigen Einträge löschen?'))return;
+    if(!confirm(t('w.deleteConfirm').replace('{n}',watches[idx].name.replace(/\n/g,' '))))return;
     var wid=watches[idx].id;
     watches.splice(idx,1);
     logs=logs.filter(function(l){return l.watchId!==wid;});
@@ -747,7 +931,7 @@ document.getElementById('btn-cancel-watch').addEventListener('click',function(){
 // ── LOGBUCH ───────────────────────────────────────────────
 function renderLog(){
   var el=document.getElementById('log-list');
-  if(!logs.length){el.innerHTML='<div class="empty">Noch keine Einträge vorhanden.</div>';return;}
+  if(!logs.length){el.innerHTML='<div class="empty">'+t('e.noLogs')+'</div>';return;}
   var sorted=logs.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
   el.innerHTML=sorted.map(function(l){
     var w=watches.find(function(w){return w.id===l.watchId;});
@@ -756,7 +940,7 @@ function renderLog(){
     return '<div class="log-row">'+
       '<div style="display:flex;align-items:center;gap:9px">'+
       '<div style="width:8px;height:8px;border-radius:50%;background:'+c+';flex-shrink:0"></div>'+
-      '<div><div style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':'Gelöschte Uhr')+'</div>'+
+      '<div><div style="font-weight:600">'+(w?esc(w.name)+' ('+esc(w.brand)+')':t('g.deleted'))+'</div>'+
       (l.note?'<div style="font-size:11px;color:var(--t3)">'+esc(l.note)+'</div>':'')+
       '</div></div>'+
       '<div style="display:flex;align-items:center;gap:6px">'+
@@ -775,7 +959,7 @@ document.getElementById('log-list').addEventListener('click',function(e){
   var idx=logs.findIndex(function(l){return l.id===id;});
   if(idx===-1)return;
   if(action==='delete-log'){
-    if(!confirm('Diesen Eintrag löschen?'))return;
+    if(!confirm(t('l.deleteConfirm')))return;
     logs.splice(idx,1);saveAll();renderLog();
   } else if(action==='edit-log'){
     document.getElementById('edit-li').value=id;
@@ -813,7 +997,7 @@ function getWatchYearLogs(base){
 
 function renderHeatmap(filteredLogs){
   var wrap=document.getElementById('heatmap-wrap');
-  if(!filteredLogs.length){wrap.innerHTML='<div class="empty" style="padding:20px">'+(logs.length?'Keine Daten für diese Auswahl.':'Noch keine Daten vorhanden.')+'</div>';return;}
+  if(!filteredLogs.length){wrap.innerHTML='<div class="empty" style="padding:20px">'+(logs.length?t('stat.noData'):t('stat.noDataYet'))+'</div>';return;}
   var dayMap={};
   filteredLogs.forEach(function(l){dayMap[l.date]=(dayMap[l.date]||0)+1;});
   var now=new Date();now.setHours(0,0,0,0);
@@ -845,10 +1029,12 @@ function renderHeatmap(filteredLogs){
   var watchColor=null;
   if(statsWatchId){var wci=watches.findIndex(function(w){return w.id===statsWatchId;});if(wci>=0)watchColor=COLORS[wci%COLORS.length];}
   function hexRgb(h){return parseInt(h.slice(1,3),16)+','+parseInt(h.slice(3,5),16)+','+parseInt(h.slice(5,7),16);}
+  var isLightTheme=document.documentElement.getAttribute('data-theme')==='light';
   function cellColor(cnt,inRange){
     if(!inRange)return 'transparent';
-    if(cnt===0)return '#1e2230';
-    var base=watchColor||'#4f8ef7';
+    if(cnt===0)return isLightTheme?'#e4e8f2':'#1e2230';
+    var accentVar=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    var base=watchColor||accentVar||'#1db86a';
     if(base.startsWith('#')&&base.length===7)return 'rgba('+hexRgb(base)+','+(Math.min(0.25+cnt*0.3,1))+')';
     return base;
   }
@@ -865,25 +1051,41 @@ function renderHeatmap(filteredLogs){
   html+='<div style="display:flex;margin-left:24px;height:14px;position:relative;margin-bottom:2px">';
   monthLabels.forEach(function(ml){html+='<span style="position:absolute;left:'+ml.col*CW+'px;font-size:10px;color:var(--t3)">'+ml.label+'</span>';});
   html+='</div>';
-  var dayNames=['Mo','Di','Mi','Do','Fr','Sa','So'];
+  var dayNames=curLang==='en'?['Mo','Tu','We','Th','Fr','Sa','Su']:['Mo','Di','Mi','Do','Fr','Sa','So'];
   for(var row=0;row<7;row++){
     html+='<div style="display:flex;align-items:center;height:'+(CS+CG)+'px">';
     html+='<div style="width:22px;font-size:9px;color:var(--t3);text-align:right;padding-right:5px;flex-shrink:0">'+(row%2===0?dayNames[row]:'')+'</div>';
     weeks.forEach(function(week){
       var cell=week[row];
       var bg=cellColor(cell.count,cell.inRange);
-      var title=cell.inRange?(cell.date+(cell.count>0?': '+cell.count+(cell.count>1?' Einträge':' Eintrag'):'')):'';
+      var title=cell.inRange?(cell.date+(cell.count>0?': '+cell.count+(cell.count>1?t('stat.heatEntries'):t('stat.heatEntry')):'')):'';
       html+='<div title="'+esc(title)+'" style="width:'+CS+'px;height:'+CS+'px;background:'+bg+';border-radius:2px;margin-right:'+CG+'px;flex-shrink:0"></div>';
     });
     html+='</div>';
   }
   html+='<div style="display:flex;align-items:center;gap:4px;margin-top:6px;margin-left:24px">';
-  html+='<span style="font-size:10px;color:var(--t3);margin-right:2px">Weniger</span>';
+  html+='<span style="font-size:10px;color:var(--t3);margin-right:2px">'+t('stat.less')+'</span>';
   [0,1,2,3].forEach(function(lv){html+='<div style="width:'+CS+'px;height:'+CS+'px;background:'+cellColor(lv,true)+';border-radius:2px"></div>';});
-  html+='<span style="font-size:10px;color:var(--t3);margin-left:2px">Mehr</span>';
+  html+='<span style="font-size:10px;color:var(--t3);margin-left:2px">'+t('stat.more')+'</span>';
   html+='</div>';
   html+='</div></div>';
   wrap.innerHTML=html;
+}
+
+function chartColors(){
+  var light=document.documentElement.getAttribute('data-theme')==='light';
+  var accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#1db86a';
+  var accentRgb=getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim()||'29,184,106';
+  return {
+    grid:light?'#dde0ea':'#1a1d24',
+    tick:light?'#8a95a8':'#4a5268',
+    legend:light?'#555c6e':'#8a95a8',
+    pieBorder:light?'#ffffff':'#13151a',
+    ptBorder:light?'#ffffff':'#13151a',
+    accent:accent,
+    accentRgb:accentRgb,
+    accentFill:'rgba('+accentRgb+',.1)'
+  };
 }
 
 function renderStats(){
@@ -891,12 +1093,12 @@ function renderStats(){
   var years=[];
   logs.forEach(function(l){var y=l.date.slice(0,4);if(years.indexOf(y)===-1)years.push(y);});
   years.sort().reverse();
-  var pillsHtml='<button class="pill'+(statsYear==='all'?' active':'')+'" data-year="all">Alle</button>';
+  var pillsHtml='<button class="pill'+(statsYear==='all'?' active':'')+'" data-year="all">'+t('stat.all')+'</button>';
   years.forEach(function(y){pillsHtml+='<button class="pill'+(statsYear===y?' active':'')+'" data-year="'+esc(y)+'">'+esc(y)+'</button>';});
   document.getElementById('year-pills').innerHTML=pillsHtml;
   // Watch select
   var wsel=document.getElementById('stats-watch-sel');
-  wsel.innerHTML='<option value="">Alle Uhren</option>';
+  wsel.innerHTML='<option value="">'+t('stat.allWatches')+'</option>';
   watches.forEach(function(w){var o=document.createElement('option');o.value=w.id;o.textContent=w.name+' – '+w.brand;wsel.appendChild(o);});
   if(statsWatchId&&watches.find(function(w){return w.id===statsWatchId;})){wsel.value=statsWatchId;}else{statsWatchId='';}
   // Filtered data
@@ -911,37 +1113,39 @@ function renderStats(){
   if(statsWatchId){
     var pct=totalDays>0?Math.round(filtDays/totalDays*100):0;
     metricsHtml=
-      '<div class="metric"><div class="ml">Einträge</div><div class="mv">'+filteredLogs.length+'</div></div>'+
-      '<div class="metric"><div class="ml">Tage getragen</div><div class="mv">'+filtDays+'</div></div>'+
-      '<div class="metric"><div class="ml">Anteil</div><div class="mv">'+pct+'%</div><div class="ms">aller Tage</div></div>';
+      '<div class="metric"><div class="ml">'+t('stat.entries')+'</div><div class="mv">'+filteredLogs.length+'</div></div>'+
+      '<div class="metric"><div class="ml">'+t('stat.daysworn')+'</div><div class="mv">'+filtDays+'</div></div>'+
+      '<div class="metric"><div class="ml">'+t('stat.share')+'</div><div class="mv">'+pct+'%</div><div class="ms">'+t('stat.ofDays')+'</div></div>';
   }else{
     metricsHtml=
-      '<div class="metric"><div class="ml">Einträge'+(statsYear!=='all'?' '+esc(statsYear):' gesamt')+'</div><div class="mv">'+yearLogs.length+'</div></div>'+
-      '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+totalDays+'</div></div>'+
-      '<div class="metric"><div class="ml">Lieblingsuhr'+(statsYear!=='all'?' '+esc(statsYear):'')+'</div><div class="mv" style="font-size:14px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+'x getragen</div></div>';
+      '<div class="metric"><div class="ml">'+t('stat.entries')+(statsYear!=='all'?' '+esc(statsYear):' '+t('stat.total'))+'</div><div class="mv">'+yearLogs.length+'</div></div>'+
+      '<div class="metric"><div class="ml">'+t('met.days')+'</div><div class="mv">'+totalDays+'</div></div>'+
+      '<div class="metric"><div class="ml">'+t('met.fav')+(statsYear!=='all'?' '+esc(statsYear):'')+'</div><div class="mv" style="font-size:14px">'+esc(fav.n)+'</div><div class="ms">'+fav.c+t('wa.worn')+'</div></div>';
   }
   document.getElementById('metric-grid').innerHTML=metricsHtml;
   // Heatmap title + render
-  var htitle='Trageverhalten';
-  if(statsWatchId){var hw=watches.find(function(w){return w.id===statsWatchId;});if(hw)htitle='Trageverhalten — '+hw.name;}
+  var htitle=t('stat.wearing');
+  if(statsWatchId){var hw=watches.find(function(w){return w.id===statsWatchId;});if(hw)htitle=t('stat.wearing')+' — '+hw.name;}
   document.getElementById('heatmap-title').textContent=htitle;
   renderHeatmap(filteredLogs);
   // Bar chart (year scope, all watches, highlight selected)
   var counts=watches.map(function(w){return countMap[w.id]||0;});
   var labels=watches.map(function(w){return w.name;});
-  var bgColors=watches.map(function(w,i){return(statsWatchId&&w.id!==statsWatchId)?'rgba(79,142,247,0.18)':COLORS[i%COLORS.length];});
+  var dimColor='rgba('+cc.accentRgb+',0.15)';
+  var bgColors=watches.map(function(w,i){return(statsWatchId&&w.id!==statsWatchId)?dimColor:COLORS[i%COLORS.length];});
   var bh=Math.max(160,watches.length*44+60);
   document.getElementById('bar-wrap').style.height=bh+'px';
   if(barC&&barC.data.labels.length===labels.length){
     barC.data.datasets[0].data=counts;barC.data.datasets[0].backgroundColor=bgColors;barC.update('none');
   }else{
     if(barC)barC.destroy();
+    var cc=chartColors();
     barC=new Chart(document.getElementById('barChart'),{
       type:'bar',
       data:{labels:labels,datasets:[{data:counts,backgroundColor:bgColors,borderWidth:0,borderRadius:4}]},
       options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-        x:{beginAtZero:true,ticks:{stepSize:1,color:'#4a5268'},grid:{color:'#1a1d24'}},
-        y:{ticks:{color:'#8a95a8'},grid:{color:'#1a1d24'}}
+        x:{beginAtZero:true,ticks:{stepSize:1,color:cc.tick},grid:{color:cc.grid}},
+        y:{ticks:{color:cc.legend},grid:{color:cc.grid}}
       }}
     });
   }
@@ -952,12 +1156,12 @@ function renderStats(){
     var last30=[];
     for(var i=0;i<30;i++){var tday=new Date();tday.setDate(tday.getDate()-29+i);last30.push(tday.toISOString().slice(0,10));}
     var lineMap={};lineLogs.forEach(function(l){if(lineMap[l.date]!==undefined)lineMap[l.date]++;else lineMap[l.date]=1;});
-    lineTitle='Zeitverlauf — letzte 30 Tage';
+    lineTitle=t('stat.timeline');
     lineLabels=last30.map(function(d){return d.slice(5);});
     lineData=last30.map(function(d){return lineMap[d]||0;});
   }else{
     var lineMap={};lineLogs.forEach(function(l){var mo=l.date.slice(0,7);lineMap[mo]=(lineMap[mo]||0)+1;});
-    lineTitle='Zeitverlauf '+esc(statsYear)+' (monatlich)';
+    lineTitle=t('stat.timelineYear').replace('{y}',esc(statsYear));
     lineLabels=MONTHS;
     lineData=MONTHS.map(function(m,mi){return lineMap[statsYear+'-'+String(mi+1).padStart(2,'0')]||0;});
   }
@@ -968,10 +1172,10 @@ function renderStats(){
     if(lineC)lineC.destroy();
     lineC=new Chart(document.getElementById('lineChart'),{
       type:'line',
-      data:{labels:lineLabels,datasets:[{data:lineData,borderColor:'#4f8ef7',backgroundColor:'rgba(79,142,247,.1)',fill:true,tension:.3,pointRadius:2,pointBackgroundColor:'#4f8ef7'}]},
+      data:{labels:lineLabels,datasets:[{data:lineData,borderColor:cc.accent,backgroundColor:cc.accentFill,fill:true,tension:.3,pointRadius:2,pointBackgroundColor:cc.accent}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-        x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:12,color:'#4a5268'},grid:{color:'#1a1d24'}},
-        y:{beginAtZero:true,ticks:{stepSize:1,color:'#4a5268'},grid:{color:'#1a1d24'}}
+        x:{ticks:{maxRotation:45,autoSkip:true,maxTicksLimit:12,color:cc.tick},grid:{color:cc.grid}},
+        y:{beginAtZero:true,ticks:{stepSize:1,color:cc.tick},grid:{color:cc.grid}}
       }}
     });
   }
@@ -988,7 +1192,7 @@ function renderStats(){
     if(pieC)pieC.destroy();
     pieC=new Chart(document.getElementById('pieChart'),{
       type:'doughnut',
-      data:{labels:labels,datasets:[{data:counts,backgroundColor:pieBg,borderColor:'#13151a',borderWidth:3}]},
+      data:{labels:labels,datasets:[{data:counts,backgroundColor:pieBg,borderColor:cc.pieBorder,borderWidth:3}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
     });
   }
@@ -1049,27 +1253,28 @@ function renderPriceChart(){
     return base>0?(last-base)/base*100:0;
   }
 
+  var cc=chartColors();
   // ── Single watch view ─────────────────────────────────────
   if(statsWatchId){
     var w=watches.find(function(w){return w.id===statsWatchId;});
     if(!w||(!w.purchasePrice&&!(w.priceHistory&&w.priceHistory.length))){
-      metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">Keine Preisdaten für diese Uhr.</div>';
+      metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">'+t('stat.noPriceWatch')+'</div>';
       outer.style.display='none';if(priceC){priceC.destroy();priceC=null;}return;
     }
     var r=makeRange(w);
     var usedPts=applyRange(buildPricePoints(w,'used'),r);
     var newPts=applyRange(buildPricePoints(w,'new'),r);
     if(!usedPts.length&&!newPts.length){
-      metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">Keine Preisdaten für diesen Zeitraum.</div>';
+      metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">'+t('stat.noPricePeriod')+'</div>';
       outer.style.display='none';if(priceC){priceC.destroy();priceC=null;}return;
     }
     outer.style.display='block';
     var mh='';
     if(w.purchasePrice&&w.purchaseDate){
-      mh+='<div class="metric"><div class="ml">Kaufpreis</div><div class="mv" style="font-size:15px">€'+Math.round(w.purchasePrice).toLocaleString('de-DE')+'</div><div class="ms">'+esc(w.purchaseDate)+'</div></div>';
+      mh+='<div class="metric"><div class="ml">'+t('stat.purchasePrice')+'</div><div class="mv" style="font-size:15px">€'+Math.round(w.purchasePrice).toLocaleString('de-DE')+'</div><div class="ms">'+esc(w.purchaseDate)+'</div></div>';
     }
-    if(usedPts.length){var lu=usedPts[usedPts.length-1],cu=priceDelta(usedPts,w.purchasePrice),ccu=cu>=0?'var(--green)':'var(--red)';mh+='<div class="metric"><div class="ml">Werterhalt getragen</div><div class="mv" style="font-size:15px">€'+Math.round(lu.price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+ccu+'">'+(cu>=0?'+':'')+cu.toFixed(1)+'% vs. Kauf</div></div>';}
-    if(newPts.length){var ln=newPts[newPts.length-1],cn=priceDelta(newPts,w.purchasePrice),ccn=cn>=0?'var(--green)':'var(--red)';mh+='<div class="metric"><div class="ml">Werterhalt ungetragen</div><div class="mv" style="font-size:15px">€'+Math.round(ln.price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+ccn+'">'+(cn>=0?'+':'')+cn.toFixed(1)+'% vs. Kauf</div></div>';}
+    if(usedPts.length){var lu=usedPts[usedPts.length-1],cu=priceDelta(usedPts,w.purchasePrice),ccu=cu>=0?'var(--green)':'var(--red)';mh+='<div class="metric"><div class="ml">'+t('stat.valueUsed')+'</div><div class="mv" style="font-size:15px">€'+Math.round(lu.price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+ccu+'">'+(cu>=0?'+':'')+cu.toFixed(1)+t('stat.vsCost')+'</div></div>';}
+    if(newPts.length){var ln=newPts[newPts.length-1],cn=priceDelta(newPts,w.purchasePrice),ccn=cn>=0?'var(--green)':'var(--red)';mh+='<div class="metric"><div class="ml">'+t('stat.valueNew')+'</div><div class="mv" style="font-size:15px">€'+Math.round(ln.price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+ccn+'">'+(cn>=0?'+':'')+cn.toFixed(1)+t('stat.vsCost')+'</div></div>';}
     metricsEl.innerHTML=mh;
     var dateSet={};
     usedPts.forEach(function(p){dateSet[p.date]=1;});newPts.forEach(function(p){dateSet[p.date]=1;});
@@ -1080,12 +1285,13 @@ function renderPriceChart(){
     var hex=COLORS[wci>=0?wci%COLORS.length:0];
     var rgb=parseInt(hex.slice(1,3),16)+','+parseInt(hex.slice(3,5),16)+','+parseInt(hex.slice(5,7),16);
     var datasets=[
-      {label:'Werterhalt getragen',data:labels.map(function(d){return usedMap[d]!==undefined?usedMap[d]:null;}),borderColor:hex,backgroundColor:'rgba('+rgb+',0.10)',fill:true,tension:0.3,borderWidth:2.5,spanGaps:true,pointRadius:5,pointHoverRadius:7,pointStyle:'circle',pointBackgroundColor:hex,pointBorderColor:'#13151a',pointBorderWidth:1.5},
-      {label:'Werterhalt ungetragen',data:labels.map(function(d){return newMap[d]!==undefined?newMap[d]:null;}),borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.0)',fill:false,tension:0.3,borderWidth:2,borderDash:[7,4],spanGaps:true,pointRadius:5,pointHoverRadius:7,pointStyle:'rectRot',pointBackgroundColor:'#f5a623',pointBorderColor:'#13151a',pointBorderWidth:1.5}
+      {label:t('stat.valueUsed'),data:labels.map(function(d){return usedMap[d]!==undefined?usedMap[d]:null;}),borderColor:hex,backgroundColor:'rgba('+rgb+',0.10)',fill:true,tension:0.3,borderWidth:2.5,spanGaps:true,pointRadius:5,pointHoverRadius:7,pointStyle:'circle',pointBackgroundColor:hex,pointBorderColor:cc.ptBorder,pointBorderWidth:1.5},
+      {label:t('stat.valueNew'),data:labels.map(function(d){return newMap[d]!==undefined?newMap[d]:null;}),borderColor:'#f5a623',backgroundColor:'rgba(245,166,35,0.0)',fill:false,tension:0.3,borderWidth:2,borderDash:[7,4],spanGaps:true,pointRadius:5,pointHoverRadius:7,pointStyle:'rectRot',pointBackgroundColor:'#f5a623',pointBorderColor:cc.ptBorder,pointBorderWidth:1.5}
     ];
-    if(w.purchasePrice&&labels.length){datasets.push({label:'Kaufpreis',data:labels.map(function(){return Math.round(w.purchasePrice);}),borderColor:'rgba('+rgb+',0.35)',borderDash:[2,5],borderWidth:1.5,pointRadius:0,fill:false,tension:0,spanGaps:true});}
+    var purchLabel=t('stat.purchasePrice');
+    if(w.purchasePrice&&labels.length){datasets.push({label:purchLabel,data:labels.map(function(){return Math.round(w.purchasePrice);}),borderColor:'rgba('+rgb+',0.35)',borderDash:[2,5],borderWidth:1.5,pointRadius:0,fill:false,tension:0,spanGaps:true});}
     if(priceC){priceC.destroy();priceC=null;}
-    priceC=new Chart(document.getElementById('priceChart'),{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8a95a8',font:{size:11},boxWidth:12,padding:14,filter:function(item){return item.text!=='Kaufpreis';}}},tooltip:{mode:'index',intersect:false,filter:function(item){return item.parsed.y!==null&&item.dataset.label!=='Kaufpreis';},callbacks:{label:function(ctx){return ctx.dataset.label+': €'+ctx.parsed.y.toLocaleString('de-DE');}}}},scales:{x:{ticks:{color:'#4a5268',maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:'#1a1d24'}},y:{beginAtZero:false,ticks:{color:'#4a5268',callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:'#1a1d24'}}}}});
+    priceC=new Chart(document.getElementById('priceChart'),{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:cc.legend,font:{size:11},boxWidth:12,padding:14,filter:function(item){return item.text!==purchLabel;}}},tooltip:{mode:'index',intersect:false,filter:function(item){return item.parsed.y!==null&&item.dataset.label!==purchLabel;},callbacks:{label:function(ctx){return ctx.dataset.label+': €'+ctx.parsed.y.toLocaleString('de-DE');}}}},scales:{x:{ticks:{color:cc.tick,maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:cc.grid}},y:{beginAtZero:false,ticks:{color:cc.tick,callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:cc.grid}}}}});
     return;
   }
 
@@ -1100,23 +1306,24 @@ function renderPriceChart(){
   }).filter(function(s){return s.pts.length;});
 
   if(!watchSeries.length){
-    metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">Keine Preisdaten für diesen Zeitraum.</div>';
+    metricsEl.innerHTML='<div style="color:var(--t3);font-size:12px;padding:4px 0">'+t('stat.noPricePeriod')+'</div>';
     outer.style.display='none';if(priceC){priceC.destroy();priceC=null;}return;
   }
   outer.style.display='block';
   metricsEl.innerHTML=watchSeries.map(function(s){
     var cu=priceDelta(s.pts,s.w.purchasePrice),cc=cu>=0?'var(--green)':'var(--red)';
-    return '<div class="metric"><div class="ml">'+esc(s.w.name)+'</div><div class="mv" style="font-size:15px">€'+Math.round(s.pts[s.pts.length-1].price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+cc+'">'+(cu>=0?'+':'')+cu.toFixed(1)+'% vs. Kauf</div></div>';
+    return '<div class="metric"><div class="ml">'+esc(s.w.name)+'</div><div class="mv" style="font-size:15px">€'+Math.round(s.pts[s.pts.length-1].price).toLocaleString('de-DE')+'</div><div class="ms" style="color:'+cc+'">'+(cu>=0?'+':'')+cu.toFixed(1)+t('stat.vsCost')+'</div></div>';
   }).join('');
 
   var labels2=Object.keys(dateSet2).sort();
+  var cc2=chartColors();
   var datasets2=watchSeries.map(function(s){
     var pm={};s.pts.forEach(function(p){pm[p.date]=Math.round(p.price);});
     var rgb2=parseInt(s.hex.slice(1,3),16)+','+parseInt(s.hex.slice(3,5),16)+','+parseInt(s.hex.slice(5,7),16);
-    return {label:s.w.name,data:labels2.map(function(d){return pm[d]!==undefined?pm[d]:null;}),borderColor:s.hex,backgroundColor:'rgba('+rgb2+',0.07)',fill:false,tension:0.3,borderWidth:2,spanGaps:true,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:s.hex,pointBorderColor:'#13151a',pointBorderWidth:1};
+    return {label:s.w.name,data:labels2.map(function(d){return pm[d]!==undefined?pm[d]:null;}),borderColor:s.hex,backgroundColor:'rgba('+rgb2+',0.07)',fill:false,tension:0.3,borderWidth:2,spanGaps:true,pointRadius:3,pointHoverRadius:5,pointBackgroundColor:s.hex,pointBorderColor:cc2.ptBorder,pointBorderWidth:1};
   });
   if(priceC){priceC.destroy();priceC=null;}
-  priceC=new Chart(document.getElementById('priceChart'),{type:'line',data:{labels:labels2,datasets:datasets2},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#8a95a8',font:{size:11},boxWidth:12,padding:14}},tooltip:{mode:'index',intersect:false,filter:function(item){return item.parsed.y!==null;},callbacks:{label:function(ctx){return ctx.dataset.label+': €'+ctx.parsed.y.toLocaleString('de-DE');}}}},scales:{x:{ticks:{color:'#4a5268',maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:'#1a1d24'}},y:{beginAtZero:false,ticks:{color:'#4a5268',callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:'#1a1d24'}}}}});
+  priceC=new Chart(document.getElementById('priceChart'),{type:'line',data:{labels:labels2,datasets:datasets2},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:cc2.legend,font:{size:11},boxWidth:12,padding:14}},tooltip:{mode:'index',intersect:false,filter:function(item){return item.parsed.y!==null;},callbacks:{label:function(ctx){return ctx.dataset.label+': €'+ctx.parsed.y.toLocaleString('de-DE');}}}},scales:{x:{ticks:{color:cc2.tick,maxRotation:45,autoSkip:true,maxTicksLimit:12},grid:{color:cc2.grid}},y:{beginAtZero:false,ticks:{color:cc2.tick,callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:cc2.grid}}}}});
 }
 
 // ── PREISHISTORIE MODAL ───────────────────────────────────
@@ -1125,13 +1332,13 @@ function renderPriceHistoryList(wid){
   if(!w){document.getElementById('price-history-list').innerHTML='';return;}
   var pts=buildPricePoints(w);
   var el=document.getElementById('price-history-list');
-  if(!pts.length){el.innerHTML='<div class="empty" style="padding:14px">Noch keine Preisdaten.</div>';return;}
+  if(!pts.length){el.innerHTML='<div class="empty" style="padding:14px">'+t('m.noPriceData')+'</div>';return;}
   el.innerHTML=pts.map(function(p){
     var isNew=p.type==='new';
-    var typeBadge='<span class="badge" style="font-size:10px;'+(isNew?'background:#2e1e05;color:var(--amber)':'background:var(--bg3);color:var(--t2)')+'">'+(isNew?'Neu':'Gebraucht')+'</span>';
+    var typeBadge='<span class="badge" style="font-size:10px;'+(isNew?'background:#2e1e05;color:var(--amber)':'background:var(--bg3);color:var(--t2)')+'">'+(isNew?t('m.new'):t('m.used'))+'</span>';
     return '<div class="log-row" style="font-size:12px">'+
       '<div style="display:flex;align-items:center;gap:5px">'+esc(p.date)+
-      (p.isPurchase?'<span style="font-size:10px;color:var(--t3)">(Kauf)</span>':'')+
+      (p.isPurchase?'<span style="font-size:10px;color:var(--t3)">'+t('m.purchase')+'</span>':'')+
       typeBadge+'</div>'+
       '<div style="display:flex;align-items:center;gap:6px"><span style="font-weight:700">€'+Math.round(p.price).toLocaleString('de-DE')+'</span>'+
       (!p.isPurchase?'<button class="btn btn-d" style="padding:3px 7px;font-size:11px" data-action="del-price" data-pdate="'+esc(p.date)+'" data-pprice="'+p.price+'" data-ptype="'+p.type+'">×</button>':'')+'</div></div>';
@@ -1141,7 +1348,7 @@ function renderPriceHistoryList(wid){
 function openPriceModal(idx){
   var wid=watches[idx].id;
   document.getElementById('price-wi').value=wid;
-  document.getElementById('modal-price-title').textContent='Preishistorie — '+watches[idx].name;
+  document.getElementById('modal-price-title').textContent=t('m.priceHistoryTitle').replace('{n}',watches[idx].name);
   document.getElementById('new-price-date').value=todayStr();
   document.getElementById('new-price-val').value='';
   renderPriceHistoryList(wid);
@@ -1165,13 +1372,13 @@ document.getElementById('btn-add-price-entry').addEventListener('click',function
   var wid=document.getElementById('price-wi').value;
   var date=document.getElementById('new-price-date').value;
   var val=document.getElementById('new-price-val').value;
-  if(!date||!val){alert('Bitte Datum und Preis eingeben.');return;}
+  if(!date||!val){alert(t('m.priceAlertEmpty'));return;}
   var price=parseFloat(val);
-  if(isNaN(price)||price<0){alert('Ungültiger Preis.');return;}
+  if(isNaN(price)||price<0){alert(t('m.priceAlertInvalid'));return;}
   var activeBtn=document.querySelector('#modal-price .pill.active[data-ptype]');
   var ptype=activeBtn?activeBtn.dataset.ptype:'used';
   var w=watches.find(function(x){return x.id===wid;});
-  if(!w){alert('Uhr nicht gefunden.');return;}
+  if(!w){alert(t('m.watchNotFound'));return;}
   if(!w.priceHistory)w.priceHistory=[];
   w.priceHistory.push({date:date,price:price,type:ptype});
   saveAll();renderPriceHistoryList(wid);
@@ -1205,50 +1412,49 @@ document.getElementById('modal-purge').addEventListener('click',function(e){
   if(e.target===this)this.classList.remove('open');
 });
 
+// ── ABOUT ─────────────────────────────────────────────────
+document.getElementById('btn-about').addEventListener('click',function(){
+  document.getElementById('modal-about').classList.add('open');
+});
+document.getElementById('btn-about').addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' ')document.getElementById('modal-about').classList.add('open');
+});
+document.getElementById('btn-about-close').addEventListener('click',function(){
+  document.getElementById('modal-about').classList.remove('open');
+});
+document.getElementById('modal-about').addEventListener('click',function(e){
+  if(e.target===this)this.classList.remove('open');
+});
+
 // ── EXPORT ────────────────────────────────────────────────
+function exportDatePrefix(){var d=new Date();return d.getFullYear().toString()+(d.getMonth()+1).toString().padStart(2,'0')+d.getDate().toString().padStart(2,'0');}
 document.getElementById('btn-exp-json').addEventListener('click',function(){
   var blob=new Blob([JSON.stringify({watches:watches,logs:logs,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='uhrenlogbuch.json';a.click();
+  var a=document.createElement('a');var url=URL.createObjectURL(blob);a.href=url;a.download=exportDatePrefix()+'_'+t('g.filename')+'.json';a.click();URL.revokeObjectURL(url);
 });
 
 document.getElementById('btn-exp-xls').addEventListener('click',function(){
-  var from=document.getElementById('exp-from').value;
-  var to=document.getElementById('exp-to').value;
-  if(!from||!to){alert('Bitte Zeitraum angeben.');return;}
+  if(!logs.length){alert(t('s.exportAlert'));return;}
 
-  // Alle Tage im Zeitraum generieren
-  var start=new Date(from+'T00:00:00');
-  var end=new Date(to+'T00:00:00');
-  if(start>end){alert('Von-Datum muss vor Bis-Datum liegen.');return;}
+  var sortedLogs=logs.slice().sort(function(a,b){return a.date<b.date?-1:1;});
+  var from=sortedLogs[0].date;
+  var to=sortedLogs[sortedLogs.length-1].date;
 
   var allDays=[];
-  var cur=new Date(start);
-  while(cur<=end){
-    allDays.push(cur.toISOString().slice(0,10));
-    cur.setDate(cur.getDate()+1);
-  }
+  var cur=new Date(from+'T00:00:00');
+  var end=new Date(to+'T00:00:00');
+  while(cur<=end){allDays.push(cur.toISOString().slice(0,10));cur.setDate(cur.getDate()+1);}
 
-  if(allDays.length>400){
-    if(!confirm('Der Zeitraum umfasst '+allDays.length+' Tage. Fortfahren?'))return;
-  }
-
-  // Header: Datum | Uhr1 | Uhr2 | ...
-  var header=['Datum'].concat(watches.map(function(w){return w.name+' ('+w.brand+')';}));
+  var header=[t('imp.colDate')].concat(watches.map(function(w){return w.name+' ('+w.brand+')';}));
   var rows=[header];
-
-  var logSet=new Set(logs.filter(function(l){return l.date>=from&&l.date<=to;}).map(function(l){return l.watchId+'|'+l.date;}));
-  allDays.forEach(function(dateStr){
-    var row=[dateStr];
-    watches.forEach(function(w){row.push(logSet.has(w.id+'|'+dateStr)?'x':'');});
+  var logSet=new Set(logs.map(function(l){return l.watchId+'|'+l.date;}));
+  allDays.forEach(function(d){
+    var row=[d];
+    watches.forEach(function(w){row.push(logSet.has(w.id+'|'+d)?'x':'');});
     rows.push(row);
   });
-
-  // Summenzeile
-  var sumRow=['SUMME'];
-  watches.forEach(function(w){
-    var count=logs.filter(function(l){return l.watchId===w.id&&l.date>=from&&l.date<=to;}).length;
-    sumRow.push(count);
-  });
+  var sumRow=[t('g.total')];
+  watches.forEach(function(w){sumRow.push(logs.filter(function(l){return l.watchId===w.id;}).length);});
   rows.push([]);
   rows.push(sumRow);
 
@@ -1267,18 +1473,13 @@ document.getElementById('btn-exp-xls').addEventListener('click',function(){
     ws[addr].s.font={bold:true};
   }
 
-  XLSX.utils.book_append_sheet(wb,ws,'Uhrenlogbuch');
+  XLSX.utils.book_append_sheet(wb,ws,t('g.sheetName'));
 
-  var fname='uhrenlogbuch_'+from+'_'+to+'.xlsx';
-  XLSX.writeFile(wb,fname);
+  XLSX.writeFile(wb,exportDatePrefix()+'_'+t('g.filename')+'.xlsx');
 });
 
 // ── IMPORT ────────────────────────────────────────────────
 document.getElementById('btn-imp-open').addEventListener('click',function(){document.getElementById('file-in').click();});
-document.getElementById('drop-zone').addEventListener('click',function(){document.getElementById('file-in').click();});
-document.getElementById('drop-zone').addEventListener('dragover',function(e){e.preventDefault();this.classList.add('drag-over');});
-document.getElementById('drop-zone').addEventListener('dragleave',function(){this.classList.remove('drag-over');});
-document.getElementById('drop-zone').addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag-over');var f=e.dataTransfer.files[0];if(f)processFile(f);});
 document.getElementById('file-in').addEventListener('change',function(){var f=this.files[0];if(f)processFile(f);});
 document.querySelectorAll('.imp-mode-opt').forEach(function(el){el.addEventListener('click',function(){document.querySelectorAll('.imp-mode-opt').forEach(function(x){x.classList.remove('imp-mode-sel');});el.classList.add('imp-mode-sel');});});
 
@@ -1303,27 +1504,27 @@ function isWorn(v){
 }
 
 function processFile(file){
-  if(file.size>5*1024*1024){alert('Datei zu groß (max. 5 MB).');return;}
+  if(file.size>5*1024*1024){alert(t('imp.fileTooLarge'));return;}
   if(file.name.toLowerCase().endsWith('.json')){
     var jr=new FileReader();
     jr.onload=function(e){
       try{
         var data=JSON.parse(e.target.result);
-        if(!Array.isArray(data.watches)||!Array.isArray(data.logs)){alert('Ungültiges JSON-Format.');return;}
+        if(!Array.isArray(data.watches)||!Array.isArray(data.logs)){alert(t('imp.invalidJson'));return;}
         impJsonData=data;impEntries=[];
         document.getElementById('imp-stats').innerHTML=
-          '<span class="badge bok">'+data.logs.length+' Einträge</span>'+
-          '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+data.watches.length+' Uhren</span>';
+          '<span class="badge bok">'+t('imp.badgeEntries').replace('{n}',data.logs.length)+'</span>'+
+          '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+t('imp.badgeWatches').replace('{n}',data.watches.length)+'</span>';
         var show=data.logs.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).slice(0,50);
-        var h='<thead><tr><th>Datum</th><th>Uhr</th><th>Status</th></tr></thead><tbody>';
+        var h='<thead><tr><th>'+t('imp.colDate')+'</th><th>'+t('imp.colWatch')+'</th><th>'+t('imp.colStatus')+'</th></tr></thead><tbody>';
         show.forEach(function(l){
           var w=data.watches.find(function(w){return w.id===l.watchId;});
           h+='<tr><td>'+esc(l.date)+'</td><td>'+esc(w?w.name:'?')+'</td><td><span class="badge bok">ok</span></td></tr>';
         });
-        if(data.logs.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">… und '+(data.logs.length-50)+' weitere</td></tr>';
+        if(data.logs.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">'+t('imp.andMore').replace('{n}',data.logs.length-50)+'</td></tr>';
         document.getElementById('imp-table').innerHTML=h+'</tbody>';
         document.getElementById('imp-preview').style.display='block';
-      }catch(err){alert('Fehler: '+err.message);}
+      }catch(err){alert(t('imp.error').replace('{msg}',err.message));}
     };
     jr.readAsText(file);
     return;
@@ -1334,7 +1535,7 @@ function processFile(file){
       var wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
       var ws=wb.Sheets[wb.SheetNames[0]];
       var raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      if(raw.length<2){alert('Datei leer.');return;}
+      if(raw.length<2){alert(t('imp.fileEmpty'));return;}
       var watchNames=raw[0].slice(1).map(function(h){return String(h).trim();}).filter(function(h){return h;});
       impEntries=[];
       var skipped=0;
@@ -1348,20 +1549,20 @@ function processFile(file){
       }
       var warns=impEntries.filter(function(e){return !e.date||e.date.length!==10;}).length;
       document.getElementById('imp-stats').innerHTML=
-        '<span class="badge bok">'+impEntries.length+' Einträge</span>'+
-        '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+watchNames.length+' Uhren · '+(raw.length-1)+' Tage</span>'+
-        (warns?'<span class="badge bwarn">'+warns+' Datum unklar</span>':'')+
-        (skipped?'<span class="badge berr">'+skipped+' übersprungen</span>':'');
+        '<span class="badge bok">'+t('imp.badgeEntries').replace('{n}',impEntries.length)+'</span>'+
+        '<span class="badge" style="background:var(--bg3);color:var(--t2)">'+t('imp.badgeWatches').replace('{n}',watchNames.length)+' · '+t('imp.badgeDays').replace('{n}',raw.length-1)+'</span>'+
+        (warns?'<span class="badge bwarn">'+t('imp.badgeDatesUnclear').replace('{n}',warns)+'</span>':'')+
+        (skipped?'<span class="badge berr">'+t('imp.badgeSkipped').replace('{n}',skipped)+'</span>':'');
       var show=impEntries.slice(0,50);
-      var h='<thead><tr><th>Datum</th><th>Uhr</th><th>Status</th></tr></thead><tbody>';
+      var h='<thead><tr><th>'+t('imp.colDate')+'</th><th>'+t('imp.colWatch')+'</th><th>'+t('imp.colStatus')+'</th></tr></thead><tbody>';
       show.forEach(function(e){
         var ok=e.date&&e.date.length===10;
-        h+='<tr><td>'+esc(e.date)+'</td><td>'+esc(e.watchName)+'</td><td>'+(ok?'<span class="badge bok">ok</span>':'<span class="badge bwarn">prüfen</span>')+'</td></tr>';
+        h+='<tr><td>'+esc(e.date)+'</td><td>'+esc(e.watchName)+'</td><td>'+(ok?'<span class="badge bok">ok</span>':'<span class="badge bwarn">'+t('imp.statusCheck')+'</span>')+'</td></tr>';
       });
-      if(impEntries.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">… und '+(impEntries.length-50)+' weitere</td></tr>';
+      if(impEntries.length>50)h+='<tr><td colspan="3" style="padding:5px 9px;font-size:11px;color:var(--t3);font-style:italic">'+t('imp.andMore').replace('{n}',impEntries.length-50)+'</td></tr>';
       document.getElementById('imp-table').innerHTML=h+'</tbody>';
       document.getElementById('imp-preview').style.display='block';
-    }catch(err){alert('Fehler: '+err.message);}
+    }catch(err){alert(t('imp.error').replace('{msg}',err.message));}
   };
   reader.readAsArrayBuffer(file);
 }
@@ -1396,11 +1597,11 @@ document.getElementById('btn-do-import').addEventListener('click',function(){
     });
     saveAll();
     document.getElementById('imp-done-msg').innerHTML=
-      '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> Einträge importiert'+(newW?' · <strong>'+newW+'</strong> neue Uhren':' ')+(dupes?' · <strong>'+dupes+'</strong> Duplikate übersprungen':'')+'.</div>';
+      '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> '+t('imp.doneEntries')+(newW?' · <strong>'+newW+'</strong> '+t('imp.doneNewW'):'')+(dupes?' · <strong>'+dupes+'</strong> '+t('imp.doneDupes'):'')+'.</div>';
     var show=results.slice(0,25);
     document.getElementById('imp-result-list').innerHTML=show.map(function(r){
-      return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
-    }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">… und '+(results.length-25)+' weitere</div>':'');
+      return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">'+t('imp.statusImported')+'</span>':r.status==='dupe'?'<span class="badge bwarn">'+t('imp.statusDupe')+'</span>':'<span class="badge berr">'+t('imp.statusSkip')+'</span>')+'</span></div>';
+    }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">'+t('imp.andMore').replace('{n}',results.length-25)+'</div>':'');
     document.getElementById('imp-preview').style.display='none';
     document.getElementById('imp-done').style.display='block';
     return;
@@ -1417,11 +1618,11 @@ document.getElementById('btn-do-import').addEventListener('click',function(){
   });
   saveAll();
   document.getElementById('imp-done-msg').innerHTML=
-    '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> Einträge importiert'+(newW?' · <strong>'+newW+'</strong> neue Uhren':' ')+(dupes?' · <strong>'+dupes+'</strong> Duplikate übersprungen':'')+'.</div>';
+    '<div style="background:#0d2818;color:var(--green);border:1px solid #1a4028;border-radius:var(--rs);padding:10px 13px;font-size:13px;margin-bottom:8px"><strong>'+added+'</strong> '+t('imp.doneEntries')+(newW?' · <strong>'+newW+'</strong> '+t('imp.doneNewW'):'')+(dupes?' · <strong>'+dupes+'</strong> '+t('imp.doneDupes'):'')+'.</div>';
   var show=results.slice(0,25);
   document.getElementById('imp-result-list').innerHTML=show.map(function(r){
-    return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">importiert</span>':r.status==='dupe'?'<span class="badge bwarn">Duplikat</span>':'<span class="badge berr">übersprungen</span>')+'</span></div>';
-  }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">… und '+(results.length-25)+' weitere</div>':'');
+    return '<div class="log-row"><span style="font-weight:600;font-size:12px">'+esc(r.watchName)+'</span><span style="display:flex;align-items:center;gap:6px"><span style="font-size:11px;color:var(--t3)">'+esc(r.date)+'</span>'+(r.status==='ok'?'<span class="badge bok">'+t('imp.statusImported')+'</span>':r.status==='dupe'?'<span class="badge bwarn">'+t('imp.statusDupe')+'</span>':'<span class="badge berr">'+t('imp.statusSkip')+'</span>')+'</span></div>';
+  }).join('')+(results.length>25?'<div class="log-row" style="color:var(--t3);font-size:11px;font-style:italic">'+t('imp.andMore').replace('{n}',results.length-25)+'</div>':'');
   document.getElementById('imp-preview').style.display='none';
   document.getElementById('imp-done').style.display='block';
 });
@@ -1436,7 +1637,7 @@ document.getElementById('btn-reset-import').addEventListener('click',resetImport
 document.getElementById('btn-reset-import2').addEventListener('click',resetImport);
 
 document.getElementById('btn-demo-data').addEventListener('click',function(){
-  if(!confirm('Demo-Daten laden?\n\nAlle vorhandenen Uhren und Einträge werden gelöscht und durch Testdaten ersetzt.\n\nFortfahren?'))return;
+  if(!confirm(t('s.demoConfirm')))return;
   watches=DEMO_DATA.watches.filter(function(w){return w&&w.id&&typeof w.name==='string';});
   logs=DEMO_DATA.logs.filter(function(l){return l&&typeof l.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(l.date)&&l.watchId;});
   statsYear='all';statsWatchId='';
@@ -1446,51 +1647,84 @@ document.getElementById('btn-demo-data').addEventListener('click',function(){
 document.getElementById('btn-go-stats').addEventListener('click',function(){
   document.querySelector('.nav button[data-tab="stats"]').click();
 });
-document.getElementById('btn-template').addEventListener('click',function(){
-  var wb=XLSX.utils.book_new();
-  var today=new Date();
-  var days=[];
-  for(var i=0;i<10;i++){var d=new Date(today);d.setDate(d.getDate()+i);days.push(d.toISOString().slice(0,10));}
-  var wn=['Rolex Submariner','Omega Speedmaster','Tudor Black Bay'];
-  var data=[['Datum'].concat(wn),[days[0],'x','',''],[days[1],'','x',''],[days[2],'','','x'],[days[3],'x','','']].concat(days.slice(4).map(function(d){return [d,'','',''];}));
-  var ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:13}].concat(wn.map(function(){return {wch:22};}));
-  XLSX.utils.book_append_sheet(wb,ws,'Uhrenlogbuch');
-  XLSX.writeFile(wb,'uhren-vorlage.xlsx');
+// ── Language toggle ────────────────────────────────────────
+function updateBrandTips(){
+  var tips=curLang==='en'?{green:'Rolex Green',blue:'Omega Blue',red:'Tudor Red'}:{green:'Rolex Grün',blue:'Omega Blau',red:'Tudor Rot'};
+  document.querySelectorAll('.brand-swatch[data-brand]').forEach(function(b){b.setAttribute('data-tip',tips[b.dataset.brand]||b.dataset.brand);});
+}
+function setLang(lang){
+  curLang=lang;sv('wt_lang',lang);
+  applyLang();
+  document.getElementById('lang-de').classList.toggle('active',lang==='de');
+  document.getElementById('lang-en').classList.toggle('active',lang==='en');
+  updateBrandTips();
+  var activeTab=document.querySelector('.tab.active');
+  if(activeTab){
+    var tid=activeTab.id.replace('tab-','');
+    if(tid==='start')renderStart();
+    else if(tid==='uhren')renderWatches();
+    else if(tid==='log')renderLog();
+    else if(tid==='stats'){if(barC)barC.destroy();if(lineC)lineC.destroy();if(pieC)pieC.destroy();if(priceC)priceC.destroy();barC=lineC=pieC=priceC=null;renderStats();}
+  }
+}
+document.getElementById('lang-de').addEventListener('click',function(){setLang('de');});
+document.getElementById('lang-en').addEventListener('click',function(){setLang('en');});
+
+// ── Brand theme ───────────────────────────────────────────
+var curBrand=ld('wt_brand','green');
+function applyBrand(brand){
+  curBrand=brand;sv('wt_brand',brand);
+  document.documentElement.setAttribute('data-brand',brand);
+  document.querySelectorAll('.brand-swatch').forEach(function(b){b.classList.toggle('active',b.dataset.brand===brand);});
+  if(barC){barC.destroy();barC=null;}
+  if(lineC){lineC.destroy();lineC=null;}
+  if(pieC){pieC.destroy();pieC=null;}
+  if(priceC){priceC.destroy();priceC=null;}
+  if(document.getElementById('tab-stats').classList.contains('active'))renderStats();
+  if(document.getElementById('tab-start').classList.contains('active'))renderStart();
+}
+document.querySelectorAll('.brand-swatch').forEach(function(b){
+  b.addEventListener('click',function(){applyBrand(this.dataset.brand);});
 });
 
-// ── PROFIL ────────────────────────────────────────────────
-function renderProfil(){
-  var name=ld('wt_name','');
-  var inp=document.getElementById('profil-name');
-  inp.value=name;
-  if(!inp._listening){
-    inp._listening=true;
-    inp.addEventListener('input',function(){sv('wt_name',this.value.trim());});
+// ── EINSTELLUNGEN ─────────────────────────────────────────
+function renderSettings(){
+  var nameInp=document.getElementById('settings-name');
+  nameInp.value=ld('wt_name','');
+  if(!nameInp._listening){
+    nameInp._listening=true;
+    nameInp.addEventListener('input',function(){sv('wt_name',this.value.trim());});
   }
-  var el=document.getElementById('profil-metrics');
-  if(!watches.length&&!logs.length){
-    el.innerHTML=
-      '<div style="grid-column:1/-1;padding:8px 0">'+
-      '<div style="font-size:13px;color:var(--t2);line-height:2">'+
-      '<span style="color:var(--accent);font-weight:700">1.</span> Gehe zu <strong style="color:var(--t1)">Uhren</strong> und füge deine erste Uhr hinzu.<br>'+
-      '<span style="color:var(--accent);font-weight:700">2.</span> Gehe zu <strong style="color:var(--t1)">Heute</strong> und trage täglich ein, welche Uhr du trägst.<br>'+
-      '<span style="color:var(--accent);font-weight:700">3.</span> Deine <strong style="color:var(--t1)">Statistiken</strong> wachsen automatisch mit.'+
-      '</div></div>';
-    return;
+  var tog=document.getElementById('theme-toggle');
+  var isDark=document.documentElement.getAttribute('data-theme')!=='light';
+  tog.checked=isDark;
+  if(!tog._listening){
+    tog._listening=true;
+    tog.addEventListener('change',function(){
+      var dark=this.checked;
+      document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+      sv('wt_theme',dark?'dark':'light');
+      if(barC){barC.destroy();barC=null;}
+      if(lineC){lineC.destroy();lineC=null;}
+      if(pieC){pieC.destroy();pieC=null;}
+      if(priceC){priceC.destroy();priceC=null;}
+      if(document.getElementById('tab-stats').classList.contains('active'))renderStats();
+    });
   }
-  var m=getMetrics();
-  var firstDate=logs.length?logs.map(function(l){return l.date;}).sort()[0]:null;
-  el.innerHTML=
-    '<div class="metric"><div class="ml">Uhren</div><div class="mv">'+watches.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Einträge gesamt</div><div class="mv">'+logs.length+'</div></div>'+
-    '<div class="metric"><div class="ml">Tage erfasst</div><div class="mv">'+m.days+'</div></div>'+
-    '<div class="metric"><div class="ml">Aktueller Streak</div><div class="mv">'+m.streak+'</div><div class="ms">Tage am Stück</div></div>'+
-    '<div class="metric"><div class="ml">Lieblingsuhr</div><div class="mv" style="font-size:13px">'+esc(m.fav.n)+'</div><div class="ms">'+m.fav.c+'x getragen</div></div>'+
-    (firstDate?'<div class="metric"><div class="ml">Dabei seit</div><div class="mv" style="font-size:14px">'+esc(firstDate)+'</div></div>':'');
+  document.getElementById('lang-de').classList.toggle('active',curLang==='de');
+  document.getElementById('lang-en').classList.toggle('active',curLang==='en');
+  document.querySelectorAll('.brand-swatch').forEach(function(b){b.classList.toggle('active',b.dataset.brand===curBrand);});
 }
 
 // ── Init ──────────────────────────────────────────────────
+(function(){
+  var theme=ld('wt_theme','dark');
+  document.documentElement.setAttribute('data-theme',theme);
+  var brand=ld('wt_brand','green');
+  document.documentElement.setAttribute('data-brand',brand);
+})();
+applyLang();
+updateBrandTips();
 populateSel('log-watch');
 renderStart();
 </script>

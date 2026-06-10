@@ -1427,7 +1427,13 @@ document.getElementById('modal-about').addEventListener('click',function(e){
 });
 
 // ── EXPORT ────────────────────────────────────────────────
-function exportDatePrefix(){var d=new Date();return d.getFullYear().toString()+(d.getMonth()+1).toString().padStart(2,'0')+d.getDate().toString().padStart(2,'0');}
+function exportDatePrefix(){
+  var d=new Date();
+  var date=d.getFullYear().toString()+(d.getMonth()+1).toString().padStart(2,'0')+d.getDate().toString().padStart(2,'0');
+  var time=d.getHours().toString().padStart(2,'0')+d.getMinutes().toString().padStart(2,'0')+d.getSeconds().toString().padStart(2,'0');
+  var name=ld('wt_name','').replace(/[^a-zA-Z0-9]/g,'').toLowerCase();
+  return date+'_'+time+(name?'_'+name:'');
+}
 document.getElementById('btn-exp-json').addEventListener('click',function(){
   var blob=new Blob([JSON.stringify({watches:watches,logs:logs,exportedAt:new Date().toISOString()},null,2)],{type:'application/json'});
   var a=document.createElement('a');var url=URL.createObjectURL(blob);a.href=url;a.download=exportDatePrefix()+'_'+t('g.filename')+'.json';a.click();URL.revokeObjectURL(url);

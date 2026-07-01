@@ -115,7 +115,7 @@ select option{background:var(--bg2);color:var(--t1)}
 .tbl td{padding:5px 9px;border:1px solid var(--border);color:var(--t1)}
 .tbl tr:nth-child(even) td{background:var(--bg2)}
 input[type=file]{display:none}
-.modal-wrap{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:flex-start;justify-content:center;padding-top:60px}
+.modal-wrap{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:flex-start;justify-content:center;padding-top:60px;overflow-y:auto}
 .modal-wrap.open{display:flex}
 .modal{background:var(--bg2);border-radius:var(--r);padding:20px;width:300px;border:1px solid var(--border2);box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .modal h3{font-size:15px;font-weight:700;margin-bottom:14px;color:var(--t1)}
@@ -275,6 +275,10 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
     <div id="price-chart-outer" style="position:relative;width:100%;height:200px"><canvas id="priceChart"></canvas></div>
     <div id="price-empty" style="display:none" class="empty" data-i18n="stat.priceEmpty">Kaufpreis bei einer Uhr hinterlegen oder über € Preiseinträge erfassen.</div>
   </div>
+  <button class="btn btn-p" id="btn-pdf-open" style="width:100%;justify-content:center;margin-top:4px">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="18" x2="13" y2="18"/></svg>
+    <span data-i18n="pdf.exportBtn">PDF-Report exportieren</span>
+  </button>
 </div><!-- /tab-inner -->
 </div>
 
@@ -481,6 +485,31 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
   </div>
 </div>
 
+<div class="modal-wrap" id="modal-pdf">
+  <div class="modal" style="width:330px">
+    <h3 data-i18n="pdf.title">PDF-Report erstellen</h3>
+    <p style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:14px" data-i18n="pdf.desc">Wähle den Zeitraum für die Auswertung. Die aktive Uhren-Auswahl wird berücksichtigt.</p>
+    <div class="frow" style="margin-bottom:0">
+      <div class="fg" style="margin-bottom:8px"><label data-i18n="pdf.from">Von</label><input type="date" id="pdf-from"></div>
+      <div class="fg" style="margin-bottom:8px"><label data-i18n="pdf.to">Bis</label><input type="date" id="pdf-to"></div>
+    </div>
+    <div id="pdf-filter-info" style="font-size:12px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;margin-bottom:6px"></div>
+    <div class="stitle" style="margin:10px 0 2px" data-i18n="pdf.sections">Abschnitte</div>
+    <div class="toggle-wrap" style="padding:7px 0;border-bottom:1px solid var(--border)">
+      <span class="toggle-label"><span data-i18n="pdf.secHeat">Trageverhalten</span></span>
+      <label class="toggle"><input type="checkbox" id="pdf-inc-heat" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-wrap" style="padding:7px 0">
+      <span class="toggle-label"><span data-i18n="pdf.secPrice">Preisentwicklung</span></span>
+      <label class="toggle"><input type="checkbox" id="pdf-inc-price" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="mfoot">
+      <button class="btn" id="btn-pdf-cancel" data-i18n="m.cancel">Abbrechen</button>
+      <button class="btn btn-p" id="btn-pdf-generate" data-i18n="pdf.generate">PDF erstellen</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-wrap" id="modal-about">
   <div class="modal about-modal">
     <div class="about-icon">
@@ -502,6 +531,7 @@ svg.ico{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stro
 
 <script src="xlsx.full.min.js"></script>
 <script src="chart.umd.js"></script>
+<script src="jspdf.umd.min.js"></script>
 <script>
 // ── Storage ───────────────────────────────────────────────
 function ld(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
@@ -530,6 +560,10 @@ var LANG={
     'stat.heatEntry':' Eintrag','stat.heatEntries':' Einträge','stat.less':'Weniger','stat.more':'Mehr',
     'stat.noPriceWatch':'Keine Preisdaten für diese Uhr.','stat.noPricePeriod':'Keine Preisdaten für diesen Zeitraum.',
     'stat.purchasePrice':'Kaufpreis','stat.valueUsed':'Werterhalt getragen','stat.valueNew':'Werterhalt ungetragen','stat.vsCost':'% vs. Kauf','stat.priceHistory':'Preishistorie',
+    'pdf.exportBtn':'PDF-Report exportieren','pdf.title':'PDF-Report erstellen','pdf.desc':'Wähle den Zeitraum für die Auswertung. Die aktive Uhren-Auswahl wird berücksichtigt.','pdf.from':'Von','pdf.to':'Bis','pdf.generate':'PDF erstellen','pdf.sections':'Abschnitte',
+    'pdf.reportTitle':'Statistik-Report','pdf.generated':'Erstellt','pdf.period':'Zeitraum','pdf.watch':'Uhr','pdf.allWatches':'Alle Uhren','pdf.for':'für','pdf.noData':'Keine Einträge im gewählten Zeitraum.','pdf.filterAll':'Auswertung über alle Uhren.','pdf.filterOne':'Gefiltert auf: {n}','pdf.metaFilename':'watchtracker-report',
+    'pdf.mEntries':'Einträge','pdf.mDays':'Tage getragen','pdf.mShare':'Anteil','pdf.mFav':'Lieblingsuhr','pdf.mWatches':'Uhren getragen','pdf.mAvg':'Ø Einträge/Woche',
+    'pdf.secHeat':'Trageverhalten','pdf.secFreq':'Häufigkeit pro Uhr','pdf.secDist':'Verteilung','pdf.secTimeline':'Zeitverlauf (monatlich)','pdf.secPrice':'Preisentwicklung','pdf.less':'Weniger','pdf.more':'Mehr','pdf.insights':'Erkenntnisse',
     's.display':'Darstellung','s.darkMode':'Dunkles Design','s.brand':'Farbschema','s.language':'Sprache','s.export':'Daten exportieren','s.exportXls':'Excel (.xlsx)','s.exportJson':'JSON','s.import':'Datei importieren','s.importFormats':'Unterstützte Formate: .xlsx, .xls, .csv, .json','s.importBtn':'Datei auswählen','s.data':'Daten','s.testData':'Testdaten laden','s.deleteAll':'Alle Daten löschen','s.nameTitle':'Dein Name','s.namePh':'Name eingeben …','s.nameHint':'Wird in Willkommensnachrichten verwendet.','s.xlsDesc':'Uhren, Logeinträge und Preishistorie — ideal für Auswertungen.','s.jsonDesc':'Vollständiger Datenexport — maschinenlesbar, ideal für Backups.',
     's.demoConfirm':'Demo-Daten laden?\n\nAlle vorhandenen Uhren und Einträge werden gelöscht und durch Testdaten ersetzt.\n\nFortfahren?','s.exportAlert':'Keine Einträge zum Exportieren.',
     'imp.preview':'Import-Vorschau','imp.options':'Import-Optionen','imp.merge':'Zusammenführen','imp.mergeDesc':'Bestehende Einträge behalten','imp.replace':'Ersetzen','imp.replaceDesc':'Alle Logs löschen & neu aufbauen','imp.doImport':'Jetzt importieren','imp.cancel':'Abbrechen','imp.done':'Import abgeschlossen','imp.more':'Weiteren Import','imp.goStats':'Statistiken ansehen',
@@ -567,6 +601,10 @@ var LANG={
     'stat.heatEntry':' entry','stat.heatEntries':' entries','stat.less':'Less','stat.more':'More',
     'stat.noPriceWatch':'No price data for this watch.','stat.noPricePeriod':'No price data for this period.',
     'stat.purchasePrice':'Purchase Price','stat.valueUsed':'Value (worn)','stat.valueNew':'Value (unworn)','stat.vsCost':'% vs. cost','stat.priceHistory':'Price History',
+    'pdf.exportBtn':'Export PDF Report','pdf.title':'Create PDF Report','pdf.desc':'Choose the period for the report. The active watch selection is applied.','pdf.from':'From','pdf.to':'To','pdf.generate':'Create PDF','pdf.sections':'Sections',
+    'pdf.reportTitle':'Statistics Report','pdf.generated':'Generated','pdf.period':'Period','pdf.watch':'Watch','pdf.allWatches':'All watches','pdf.for':'for','pdf.noData':'No entries in the selected period.','pdf.filterAll':'Report across all watches.','pdf.filterOne':'Filtered to: {n}','pdf.metaFilename':'watchtracker-report',
+    'pdf.mEntries':'Entries','pdf.mDays':'Days worn','pdf.mShare':'Share','pdf.mFav':'Favourite watch','pdf.mWatches':'Watches worn','pdf.mAvg':'Avg entries/week',
+    'pdf.secHeat':'Wearing','pdf.secFreq':'Frequency per Watch','pdf.secDist':'Distribution','pdf.secTimeline':'Timeline (monthly)','pdf.secPrice':'Price Development','pdf.less':'Less','pdf.more':'More','pdf.insights':'Insights',
     's.display':'Appearance','s.darkMode':'Dark Mode','s.brand':'Color Theme','s.language':'Language','s.export':'Export Data','s.exportXls':'Excel (.xlsx)','s.exportJson':'JSON','s.import':'Import File','s.importFormats':'Supported formats: .xlsx, .xls, .csv, .json','s.importBtn':'Select File','s.data':'Data','s.testData':'Load Test Data','s.deleteAll':'Delete All Data','s.nameTitle':'Your Name','s.namePh':'Enter name …','s.nameHint':'Used in welcome messages.','s.xlsDesc':'Watches, log entries and price history — great for analysis.','s.jsonDesc':'Full data export — machine-readable, ideal for backups.',
     's.demoConfirm':'Load demo data?\n\nAll existing watches and entries will be deleted and replaced with test data.\n\nContinue?','s.exportAlert':'No entries to export.',
     'imp.preview':'Import Preview','imp.options':'Import Options','imp.merge':'Merge','imp.mergeDesc':'Keep existing entries','imp.replace':'Replace','imp.replaceDesc':'Delete all logs & rebuild','imp.doImport':'Import Now','imp.cancel':'Cancel','imp.done':'Import Complete','imp.more':'Import More','imp.goStats':'View Statistics',
@@ -1483,6 +1521,422 @@ document.getElementById('btn-exp-xls').addEventListener('click',function(){
 
   XLSX.writeFile(wb,exportDatePrefix()+'_'+t('g.filename')+'.xlsx');
 });
+
+// ── PDF-REPORT ────────────────────────────────────────────
+function pdfDefaultRange(){
+  var today=todayStr(),from,to;
+  if(statsYear!=='all'){from=statsYear+'-01-01';to=statsYear+'-12-31';if(to>today)to=today;}
+  else if(logs.length){var ds=logs.map(function(l){return l.date;}).sort();from=ds[0];to=today;}
+  else{from=today;to=today;}
+  return {from:from,to:to};
+}
+document.getElementById('btn-pdf-open').addEventListener('click',function(){
+  var r=pdfDefaultRange();
+  document.getElementById('pdf-from').value=r.from;
+  document.getElementById('pdf-to').value=r.to;
+  var info;
+  if(statsWatchId){var w=watches.find(function(x){return x.id===statsWatchId;});info=t('pdf.filterOne').replace('{n}',w?w.name:'—');}
+  else info=t('pdf.filterAll');
+  document.getElementById('pdf-filter-info').textContent=info;
+  document.getElementById('modal-pdf').classList.add('open');
+});
+document.getElementById('btn-pdf-cancel').addEventListener('click',function(){document.getElementById('modal-pdf').classList.remove('open');});
+document.getElementById('modal-pdf').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+document.getElementById('btn-pdf-generate').addEventListener('click',function(){
+  var from=document.getElementById('pdf-from').value,to=document.getElementById('pdf-to').value;
+  if(!from||!to)return;
+  if(from>to){var tmp=from;from=to;to=tmp;}
+  var opts={heat:document.getElementById('pdf-inc-heat').checked,price:document.getElementById('pdf-inc-price').checked};
+  document.getElementById('modal-pdf').classList.remove('open');
+  setTimeout(function(){generateStatsPdf(from,to,opts);},60);
+});
+
+// Render a Chart.js config to a PNG data URL via an offscreen canvas
+function chartToImg(config,wpx,hpx){
+  var c=document.createElement('canvas');c.width=wpx;c.height=hpx;
+  config.options=config.options||{};
+  config.options.responsive=false;config.options.animation=false;config.options.maintainAspectRatio=false;
+  config.options.devicePixelRatio=1;
+  var ch=new Chart(c,config);
+  var url=c.toDataURL('image/png',1.0);
+  ch.destroy();
+  return url;
+}
+
+function generateStatsPdf(from,to,opts){
+  opts=opts||{};
+  var wantHeat=opts.heat!==false,wantPrice=opts.price!==false;
+  var jsPDFctor=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
+  if(!jsPDFctor){alert('PDF library not loaded.');return;}
+  var rangeLogs=logs.filter(function(l){return l.date>=from&&l.date<=to;});
+  if(!rangeLogs.length){alert(t('pdf.noData'));return;}
+  var focusLogs=statsWatchId?rangeLogs.filter(function(l){return l.watchId===statsWatchId;}):rangeLogs;
+  if(statsWatchId&&!focusLogs.length){alert(t('pdf.noData'));return;}
+  // Clamp the report start up to where data actually begins, so an extreme/empty
+  // leading range can't produce a broken, oversized heatmap. Only ever tightens.
+  var minLog=rangeLogs[0].date;for(var mli=1;mli<rangeLogs.length;mli++)if(rangeLogs[mli].date<minLog)minLog=rangeLogs[mli].date;
+  if(minLog>from)from=minLog;
+
+  var accArr=getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim().split(',').map(Number);
+  if(accArr.length!==3||isNaN(accArr[0]))accArr=[29,184,106];
+  var accHex='#'+accArr.map(function(v){return ('0'+Math.round(v).toString(16)).slice(-2);}).join('');
+  var accFill='rgba('+accArr.join(',')+',0.12)';
+  var MON=curLang==='en'?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:MONTHS;
+
+  // Per-watch counts (date-range scope, all watches)
+  var countMap={};rangeLogs.forEach(function(l){countMap[l.watchId]=(countMap[l.watchId]||0)+1;});
+  var wornIdx=[];watches.forEach(function(w,i){if((countMap[w.id]||0)>0)wornIdx.push(i);});
+  var barLabels=wornIdx.map(function(i){return watches[i].name;});
+  var barCounts=wornIdx.map(function(i){return countMap[watches[i].id]||0;});
+  var barColors=wornIdx.map(function(i){return COLORS[i%COLORS.length];});
+  var totalDays=(function(){var s={};rangeLogs.forEach(function(l){s[l.date]=1;});return Object.keys(s).length;})();
+  var focusDays=(function(){var s={};focusLogs.forEach(function(l){s[l.date]=1;});return Object.keys(s).length;})();
+  var fav={n:'—',c:0};watches.forEach(function(w){var c=countMap[w.id]||0;if(c>fav.c)fav={n:w.name,c:c};});
+
+  // Monthly timeline over range
+  var monKeys=[],cur=new Date(from.slice(0,7)+'-01T00:00:00'),endM=new Date(to.slice(0,7)+'-01T00:00:00');
+  while(cur<=endM){monKeys.push(cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'));cur.setMonth(cur.getMonth()+1);}
+  var monCount={};focusLogs.forEach(function(l){var m=l.date.slice(0,7);monCount[m]=(monCount[m]||0)+1;});
+  var monLabels=monKeys.map(function(k){return MON[parseInt(k.slice(5,7),10)-1]+(monKeys.length>12?' '+k.slice(2,4):'');});
+  var monData=monKeys.map(function(k){return monCount[k]||0;});
+
+  var insights=pdfBuildInsights(rangeLogs,focusLogs,from,to).slice(0,4);
+  var accDark=[Math.round(accArr[0]*0.7),Math.round(accArr[1]*0.7),Math.round(accArr[2]*0.7)];
+
+  var doc=new jsPDFctor({unit:'pt',format:'a4',orientation:'portrait'});
+  var PW=doc.internal.pageSize.getWidth(),PH=doc.internal.pageSize.getHeight(),M=40,CW=PW-2*M,pageTop=46;
+  var y=0;
+  function need(h){if(y+h>PH-42){doc.addPage();y=pageTop;}}
+  function panel(px,py,pw,ph){doc.setFillColor(250,251,253);doc.setDrawColor(228,231,238);doc.setLineWidth(0.8);doc.roundedRect(px,py,pw,ph,9,9,'FD');}
+  function cardTitle(txt,px,py){doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.roundedRect(px,py-7.5,3,9,1.5,1.5,'F');doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(accArr[0],accArr[1],accArr[2]);doc.text(String(txt).toUpperCase(),px+9,py);}
+  function gs(o){try{doc.setGState(new doc.GState(o));}catch(e){}}
+
+  var gen=new Date();
+  var genStr=String(gen.getDate()).padStart(2,'0')+'.'+String(gen.getMonth()+1).padStart(2,'0')+'.'+gen.getFullYear()+' '+String(gen.getHours()).padStart(2,'0')+':'+String(gen.getMinutes()).padStart(2,'0');
+
+  // ── Fancy header ──
+  var hY=40,hH=82;
+  doc.setFillColor(accDark[0],accDark[1],accDark[2]);doc.roundedRect(M,hY+3,CW,hH,12,12,'F');
+  doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.roundedRect(M,hY,CW,hH,12,12,'F');
+  // compact watch-dial motif tucked into the bottom-right corner (clear of the date/name)
+  var cx=PW-M-38,cy=hY+hH-24;
+  gs({opacity:0.10});doc.setFillColor(255,255,255);doc.circle(cx,cy,24,'F');
+  gs({opacity:0.22});doc.setDrawColor(255,255,255);doc.setLineWidth(1.1);doc.circle(cx,cy,18,'S');
+  for(var ti=0;ti<12;ti++){var ang=ti/12*Math.PI*2;doc.line(cx+Math.cos(ang)*15,cy+Math.sin(ang)*15,cx+Math.cos(ang)*18,cy+Math.sin(ang)*18);}
+  doc.setLineWidth(1.4);doc.line(cx,cy,cx,cy-11);doc.line(cx,cy,cx+7,cy+3);
+  gs({opacity:1});
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');doc.setFontSize(22);doc.text('Watch Tracker',M+20,hY+31);
+  gs({opacity:0.92});doc.setFont('helvetica','normal');doc.setFontSize(11.5);doc.text(t('pdf.reportTitle'),M+20,hY+48);gs({opacity:1});
+  doc.setFontSize(9.5);
+  var fromD=from.split('-'),toD=to.split('-');
+  doc.text(fromD[2]+'.'+fromD[1]+'.'+fromD[0]+'  –  '+toD[2]+'.'+toD[1]+'.'+toD[0],M+20,hY+65);
+  var filterStr=statsWatchId?(function(){var w=watches.find(function(x){return x.id===statsWatchId;});return w?w.name+' · '+w.brand:'—';})():t('pdf.allWatches');
+  gs({opacity:0.9});doc.text(filterStr,M+20,hY+76);gs({opacity:1});
+  doc.setFontSize(9);doc.text(t('pdf.generated')+': '+genStr,PW-M-16,hY+18,{align:'right'});
+  var uname=ld('wt_name','');if(uname){doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(uname,PW-M-16,hY+31,{align:'right'});doc.setFont('helvetica','normal');}
+  y=hY+hH+12;
+
+  // ── Metric cards ──
+  var metrics;
+  if(statsWatchId){
+    metrics=[{l:t('pdf.mEntries'),v:String(focusLogs.length)},{l:t('pdf.mDays'),v:String(focusDays)},{l:t('pdf.mShare'),v:(totalDays>0?Math.round(focusDays/totalDays*100):0)+'%'}];
+  }else{
+    metrics=[{l:t('pdf.mEntries'),v:String(rangeLogs.length)},{l:t('pdf.mWatches'),v:String(wornIdx.length)},{l:t('pdf.mFav'),v:fav.n,sub:fav.c+t('wa.worn')}];
+  }
+  var mGap=14,mW=(CW-mGap*(metrics.length-1))/metrics.length,mH=50;
+  metrics.forEach(function(m,i){
+    var x=M+i*(mW+mGap);
+    panel(x,y,mW,mH);
+    doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.roundedRect(x,y+1,3.5,mH-2,2,2,'F');
+    doc.setTextColor(120,126,140);doc.setFont('helvetica','normal');doc.setFontSize(8);
+    doc.text(String(m.l).toUpperCase(),x+15,y+16);
+    doc.setTextColor(28,32,42);doc.setFont('helvetica','bold');
+    var vSize=m.v.length>12?12:16;doc.setFontSize(vSize);
+    var vTxt=m.v;while(doc.getTextWidth(vTxt)>mW-26&&vTxt.length>3){vTxt=vTxt.slice(0,-2);}
+    if(vTxt!==m.v)vTxt=vTxt+'…';
+    doc.text(vTxt,x+15,y+(m.sub?33:38));
+    if(m.sub){doc.setFont('helvetica','normal');doc.setTextColor(120,126,140);doc.setFontSize(8);doc.text(m.sub,x+15,y+45);}
+  });
+  y+=mH+12;
+
+  // ── Insights callout ──
+  if(insights.length){
+    doc.setFont('helvetica','normal');doc.setFontSize(9.5);
+    var wrappedList=insights.map(function(s){return doc.splitTextToSize(s,CW-54);});
+    var totalLines=wrappedList.reduce(function(a,b){return a+b.length;},0);
+    var icH=24+totalLines*11+(insights.length-1)*3+8;
+    need(icH+6);
+    gs({opacity:0.06});doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.roundedRect(M,y,CW,icH,9,9,'F');gs({opacity:1});
+    doc.setDrawColor(accArr[0],accArr[1],accArr[2]);doc.setLineWidth(0.8);doc.roundedRect(M,y,CW,icH,9,9,'S');
+    doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.roundedRect(M,y+1,3.5,icH-2,2,2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(accArr[0],accArr[1],accArr[2]);doc.text(t('pdf.insights').toUpperCase(),M+16,y+16);
+    var iy=y+31;
+    wrappedList.forEach(function(wr){
+      doc.setFillColor(accArr[0],accArr[1],accArr[2]);doc.circle(M+19,iy-3,1.6,'F');
+      doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(55,60,72);
+      wr.forEach(function(ln){doc.text(ln,M+27,iy);iy+=11;});
+      iy+=3;
+    });
+    y+=icH+12;
+  }
+
+  // ── Price series (computed up front so it can factor into the layout) ──
+  var pDateSet={},pSeries=[];
+  if(wantPrice){
+    var priceW=watches.filter(function(w){return w.purchasePrice||w.purchaseDate||(w.priceHistory&&w.priceHistory.length);});
+    if(statsWatchId)priceW=priceW.filter(function(w){return w.id===statsWatchId;});
+    pSeries=priceW.map(function(w){
+      var pts=buildPricePoints(w,'used').filter(function(p){return p.date>=from&&p.date<=to;});
+      pts.forEach(function(p){pDateSet[p.date]=1;});
+      var wi=watches.indexOf(w);
+      return {w:w,pts:pts,hex:COLORS[wi>=0?wi%COLORS.length:0]};
+    }).filter(function(s){return s.pts.length;});
+  }
+  var hasPrice=pSeries.length>0;
+
+  // ── Adaptive layout: heatmap is a fixed compact band; the two chart rows
+  //    share the remaining vertical space so the report always fills one page ──
+  var bottomLimit=PH-38;
+  var _sd=new Date(from+'T00:00:00'),_ed=new Date(to+'T00:00:00'),_td=new Date();_td.setHours(0,0,0,0);if(_ed>_td)_ed=_td;
+  var monthsSpan=(_ed.getFullYear()*12+_ed.getMonth())-(_sd.getFullYear()*12+_sd.getMonth())+1;
+  var heatMonthly=monthsSpan>16;
+  var heatH=heatMonthly?140:116;
+  var chartRowStart=y+(wantHeat?heatH+12:0);
+  var rowH=Math.round((bottomLimit-chartRowStart-2*12)/2);
+  if(rowH>232)rowH=232;if(rowH<128)rowH=128;
+
+  // ── Heatmap card (optional) ──
+  if(wantHeat){
+    panel(M,y,CW,heatH);cardTitle(t('pdf.secHeat'),M+16,y+17);
+    drawHeatmapPdf(doc,M+16,y+31,CW-32,focusLogs,from,to,accArr,MON,heatH-37);
+    y+=heatH+12;
+  }
+
+  // ── Frequency + Distribution ──
+  var fdH=rowH,halfW=(CW-14)/2;
+  panel(M,y,halfW,fdH);cardTitle(t('pdf.secFreq'),M+16,y+17);
+  if(barLabels.length){
+    var barCanvasH=Math.round((fdH-38)*760/(halfW-26));
+    var barImg=chartToImg({type:'bar',data:{labels:barLabels,datasets:[{data:barCounts,backgroundColor:barColors,borderWidth:0,borderRadius:5}]},plugins:[pdfBarValues()],
+      options:{layout:{padding:{right:34,top:4,bottom:2}},indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1,color:'#666',font:{size:18}},grid:{color:'#edeff4'}},y:{ticks:{color:'#333',font:{size:19}},grid:{display:false}}}}},760,barCanvasH);
+    doc.addImage(barImg,'PNG',M+13,y+26,halfW-26,fdH-38);
+  }
+  var dx=M+halfW+14;
+  panel(dx,y,halfW,fdH);cardTitle(t('pdf.secDist'),dx+16,y+17);
+  if(barLabels.length){
+    var dSize=Math.min(fdH-30,halfW-120);if(dSize<70)dSize=fdH-52;
+    var dCY=y+16+(fdH-16-dSize)/2;
+    var dImg=chartToImg({type:'doughnut',data:{labels:barLabels,datasets:[{data:barCounts,backgroundColor:barColors,borderColor:'#ffffff',borderWidth:4}]},plugins:[pdfPieValues()],
+      options:{cutout:'56%',plugins:{legend:{display:false}}}},420,420);
+    doc.addImage(dImg,'PNG',dx+14,dCY,dSize,dSize);
+    var total=barCounts.reduce(function(a,b){return a+b;},0)||1;
+    var lgX=dx+14+dSize+10,lgY=y+34,lgRight=dx+halfW-12,lgMax=Math.min(barLabels.length,Math.max(4,Math.floor((fdH-40)/13)));
+    doc.setFont('helvetica','normal');doc.setFontSize(8);
+    for(var li=0;li<lgMax;li++){
+      var pc=barColors[li],rgb=[parseInt(pc.slice(1,3),16),parseInt(pc.slice(3,5),16),parseInt(pc.slice(5,7),16)];
+      doc.setFillColor(rgb[0],rgb[1],rgb[2]);doc.roundedRect(lgX,lgY-6,7.5,7.5,1.5,1.5,'F');
+      doc.setTextColor(60,64,74);var pctv=Math.round(barCounts[li]/total*100);
+      var suffix='  '+pctv+'%',lbl=barLabels[li];
+      while(doc.getTextWidth(lbl+suffix)>(lgRight-(lgX+11))&&lbl.length>2){lbl=lbl.slice(0,-2);}
+      doc.text(lbl+suffix,lgX+11,lgY);lgY+=13;
+    }
+    if(barLabels.length>lgMax){doc.setTextColor(140,146,160);doc.text(t('imp.andMore').replace('{n}',barLabels.length-lgMax),lgX+11,lgY);}
+  }
+  y+=fdH+12;
+
+  // ── Bottom row: Timeline (+ Price side by side) ──
+  var tlW=hasPrice?(CW-14)/2:CW;
+  panel(M,y,tlW,rowH);cardTitle(t('pdf.secTimeline'),M+16,y+17);
+  var lImg=chartToImg({type:'line',data:{labels:monLabels,datasets:[{data:monData,borderColor:accHex,backgroundColor:accFill,fill:true,tension:.35,pointRadius:2.5,pointBackgroundColor:accHex,borderWidth:2.5}]},
+    options:{layout:{padding:{top:6,right:8}},plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#666',font:{size:15},maxRotation:45,autoSkip:true,maxTicksLimit:hasPrice?8:16},grid:{color:'#edeff4'}},y:{beginAtZero:true,ticks:{stepSize:1,color:'#666',font:{size:15}},grid:{color:'#edeff4'}}}}},hasPrice?700:1040,Math.round((rowH-38)*(hasPrice?700:1040)/(tlW-24)));
+  doc.addImage(lImg,'PNG',M+12,y+26,tlW-24,rowH-38);
+  if(hasPrice){
+    var ppx=M+tlW+14;
+    panel(ppx,y,tlW,rowH);cardTitle(t('pdf.secPrice'),ppx+16,y+17);
+    var pLabels=Object.keys(pDateSet).sort();
+    var pDatasets=pSeries.map(function(s){
+      var pm={};s.pts.forEach(function(p){pm[p.date]=Math.round(p.price);});
+      return {label:s.w.name,data:pLabels.map(function(d){return pm[d]!==undefined?pm[d]:null;}),borderColor:s.hex,backgroundColor:'transparent',fill:false,tension:.3,borderWidth:2.5,spanGaps:true,pointRadius:2.5,pointBackgroundColor:s.hex};
+    });
+    var pImg=chartToImg({type:'line',data:{labels:pLabels,datasets:pDatasets},
+      options:{layout:{padding:{top:6,right:8}},plugins:{legend:{display:true,labels:{color:'#555',font:{size:14},boxWidth:12,padding:6}}},scales:{x:{ticks:{color:'#666',font:{size:13},maxRotation:45,autoSkip:true,maxTicksLimit:7},grid:{color:'#edeff4'}},y:{ticks:{color:'#666',font:{size:13},callback:function(v){return '€'+Number(v).toLocaleString('de-DE');}},grid:{color:'#edeff4'}}}}},700,Math.round((rowH-38)*700/(tlW-24)));
+    doc.addImage(pImg,'PNG',ppx+12,y+26,tlW-24,rowH-38);
+  }
+  y+=rowH+12;
+
+  // ── Footer on all pages ──
+  var pages=doc.internal.getNumberOfPages();
+  for(var pg=1;pg<=pages;pg++){
+    doc.setPage(pg);
+    doc.setDrawColor(226,230,238);doc.setLineWidth(0.7);doc.line(M,PH-30,PW-M,PH-30);
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(150,156,168);
+    doc.text('Watch Tracker · '+t('pdf.reportTitle'),M,PH-18);
+    doc.text((curLang==='en'?'Page ':'Seite ')+pg+' / '+pages,PW-M,PH-18,{align:'right'});
+  }
+
+  doc.save(exportDatePrefix()+'_'+t('pdf.metaFilename')+'.pdf');
+}
+
+// Inline Chart.js plugins to render values directly onto the PDF charts
+function pdfBarValues(){
+  return {id:'pdfBarValues',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx,meta=chart.getDatasetMeta(0),data=chart.data.datasets[0].data;
+    ctx.save();ctx.font='700 20px Helvetica, Arial, sans-serif';ctx.fillStyle='#2a2e38';ctx.textBaseline='middle';ctx.textAlign='left';
+    meta.data.forEach(function(bar,i){if(data[i]==null)return;ctx.fillText(String(data[i]),bar.x+8,bar.y);});
+    ctx.restore();
+  }};
+}
+function pdfPieValues(){
+  return {id:'pdfPieValues',afterDatasetsDraw:function(chart){
+    var ctx=chart.ctx,meta=chart.getDatasetMeta(0),data=chart.data.datasets[0].data;
+    var total=data.reduce(function(a,b){return a+(b||0);},0)||1;
+    ctx.save();ctx.font='700 20px Helvetica, Arial, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,0.22)';
+    meta.data.forEach(function(arc,i){
+      var pct=Math.round(data[i]/total*100);if(pct<7)return;
+      var p=arc.getCenterPoint();
+      ctx.strokeText(pct+'%',p.x,p.y);ctx.fillStyle='#fff';ctx.fillText(pct+'%',p.x,p.y);
+    });
+    ctx.restore();
+  }};
+}
+
+// Compute "fun facts" about wearing habits for the given range
+function pdfBuildInsights(rangeLogs,focusLogs,from,to){
+  var ins=[],en=curLang==='en';
+  var WDde=['Sonntags','Montags','Dienstags','Mittwochs','Donnerstags','Freitags','Samstags'];
+  var WDen=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var MONn=en?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:MONTHS;
+  var wn={};watches.forEach(function(w){wn[w.id]=w.name;});
+  function dow(ds){return new Date(ds+'T00:00:00').getDay();}
+  function uniqDates(arr){var s={};arr.forEach(function(l){s[l.date]=1;});return Object.keys(s).sort();}
+  var fdates=uniqDates(focusLogs);
+  var longest=0,run=0,prev=null;
+  fdates.forEach(function(ds){if(prev){var diff=Math.round((new Date(ds)-new Date(prev))/864e5);run=diff===1?run+1:1;}else run=1;if(run>longest)longest=run;prev=ds;});
+  var spanDays=Math.round((new Date(to+'T00:00:00')-new Date(from+'T00:00:00'))/864e5)+1;
+
+  if(!statsWatchId){
+    var byDow={};rangeLogs.forEach(function(l){var d=dow(l.date);byDow[d]=byDow[d]||{};byDow[d][l.watchId]=(byDow[d][l.watchId]||0)+1;});
+    var best=null;
+    Object.keys(byDow).forEach(function(d){var m=byDow[d],tot=0,tw=null,tc=0;Object.keys(m).forEach(function(wid){tot+=m[wid];if(m[wid]>tc){tc=m[wid];tw=wid;}});if(tot>=3&&tc>=2){var share=tc/tot;if(!best||share>best.share||(share===best.share&&tc>best.tc))best={d:+d,tw:tw,tc:tc,share:share};}});
+    if(best&&wn[best.tw])ins.push(en?('On '+WDen[best.d]+'s you mostly wear '+wn[best.tw]+' ('+best.tc+'×).'):(WDde[best.d]+' trägst du meist '+wn[best.tw]+' ('+best.tc+'×).'));
+    function topOf(pred){var m={};rangeLogs.forEach(function(l){if(pred(dow(l.date)))m[l.watchId]=(m[l.watchId]||0)+1;});var tw=null,tc=0;Object.keys(m).forEach(function(wid){if(m[wid]>tc){tc=m[wid];tw=wid;}});return tw;}
+    var we=topOf(function(d){return d===0||d===6;}),wd=topOf(function(d){return d>=1&&d<=5;});
+    if(we&&wd&&we!==wd&&wn[we]&&wn[wd])ins.push(en?('On weekends you reach for '+wn[we]+', on weekdays for '+wn[wd]+'.'):('Am Wochenende greifst du eher zu '+wn[we]+', unter der Woche zu '+wn[wd]+'.'));
+    var cm={};rangeLogs.forEach(function(l){cm[l.watchId]=(cm[l.watchId]||0)+1;});var dwid=null,dc=0;Object.keys(cm).forEach(function(wid){if(cm[wid]>dc){dc=cm[wid];dwid=wid;}});
+    if(dwid&&wn[dwid]){var pct=Math.round(dc/rangeLogs.length*100);ins.push(en?(wn[dwid]+' is your most-worn watch at '+pct+'% of entries.'):(wn[dwid]+' ist mit '+pct+'% deiner Einträge deine meistgetragene Uhr.'));}
+    var nWt=Object.keys(cm).length,nDt=uniqDates(rangeLogs).length;
+    if(nWt>1)ins.push(en?('You wore '+nWt+' different watches across '+nDt+' days.'):('Du hast '+nWt+' verschiedene Uhren an '+nDt+' Tagen getragen.'));
+  }else{
+    var wnm=wn[statsWatchId]||'—';
+    var byDow2={};focusLogs.forEach(function(l){var d=dow(l.date);byDow2[d]=(byDow2[d]||0)+1;});
+    var bd=null,bc=0;Object.keys(byDow2).forEach(function(d){if(byDow2[d]>bc){bc=byDow2[d];bd=+d;}});
+    if(bd!=null&&bc>=2)ins.push(en?('On '+WDen[bd]+'s you wear '+wnm+' most ('+bc+'×).'):(WDde[bd]+' trägst du '+wnm+' am häufigsten ('+bc+'×).'));
+  }
+  var mm={};focusLogs.forEach(function(l){var k=l.date.slice(0,7);mm[k]=(mm[k]||0)+1;});
+  var mk=null,mc=0;Object.keys(mm).forEach(function(k){if(mm[k]>mc){mc=mm[k];mk=k;}});
+  if(mk){var mlabel=MONn[parseInt(mk.slice(5,7),10)-1]+' '+mk.slice(0,4);ins.push(en?('Your most active month was '+mlabel+' with '+mc+' entries.'):('Dein aktivster Monat war '+mlabel+' mit '+mc+' Einträgen.'));}
+  if(longest>=3)ins.push(en?('Your longest streak: '+longest+' days in a row.'):('Deine längste Serie: '+longest+' Tage am Stück.'));
+  var cpct=spanDays>0?Math.round(fdates.length/spanDays*100):0;
+  if(spanDays>=7)ins.push(en?('You logged a watch on '+cpct+'% of days in the period.'):('An '+cpct+'% der Tage im Zeitraum hast du eine Uhr getragen.'));
+  return ins;
+}
+
+function drawHeatmapPdf(doc,x,y,w,focusLogs,from,to,accArr,MON,availH){
+  var startDate=new Date(from+'T00:00:00'),endDate=new Date(to+'T00:00:00');
+  var now=new Date();now.setHours(0,0,0,0);if(endDate>now)endDate=new Date(now);
+  // For long ranges the daily grid degrades to an unreadable smear — use a month grid instead
+  var monthsSpan=(endDate.getFullYear()*12+endDate.getMonth())-(startDate.getFullYear()*12+startDate.getMonth())+1;
+  if(monthsSpan>16){drawMonthHeatmapPdf(doc,x,y,w,availH||80,focusLogs,startDate,endDate,accArr,MON);return;}
+  var dayMap={};focusLogs.forEach(function(l){dayMap[l.date]=(dayMap[l.date]||0)+1;});
+  var gridStart=new Date(startDate),dow=gridStart.getDay();gridStart.setDate(gridStart.getDate()+(dow===0?-6:1-dow));
+  var gridEnd=new Date(endDate),edow=gridEnd.getDay();if(edow!==0)gridEnd.setDate(gridEnd.getDate()+(7-edow));
+  var weeks=[],cur=new Date(gridStart);
+  while(cur<=gridEnd){var wk=[];for(var d=0;d<7;d++){var ds=cur.toISOString().slice(0,10);wk.push({date:ds,count:dayMap[ds]||0,inRange:cur>=startDate&&cur<=endDate});cur.setDate(cur.getDate()+1);}weeks.push(wk);}
+  var nW=weeks.length,labW=20;
+  // week column width scales to always fit within w; cell < step so the grid never overflows
+  var step=(w-labW)/nW;if(step>9)step=9;
+  var gap=Math.min(1.4,step*0.18),cell=step-gap;if(cell<0.8)cell=0.8;
+  var rr=Math.min(1,cell/2),ox=x+labW,gy=y+9;
+  var gridRight=ox+nW*step;
+  function cellColor(cnt,inRange){
+    if(!inRange)return null;
+    if(cnt===0)return[230,233,240];
+    var a=Math.min(0.28+cnt*0.3,1);
+    return[Math.round(255+(accArr[0]-255)*a),Math.round(255+(accArr[1]-255)*a),Math.round(255+(accArr[2]-255)*a)];
+  }
+  // month labels (thinned to year markers when the columns get too narrow)
+  var yearOnly=step<6.5,seen={};doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,156,168);
+  weeks.forEach(function(wk,wi){
+    for(var r=0;r<7;r++){var c=wk[r];if(!c.inRange)continue;
+      var lx2=ox+wi*step;
+      if(yearOnly){var yr=c.date.slice(0,4);if((c.date.slice(5,7)==='01'||wi===0)&&!seen['y'+yr]){seen['y'+yr]=1;if(lx2<gridRight-16)doc.text(yr,lx2,y+5);}}
+      else{var mk=c.date.slice(0,7);if(!seen[mk]){seen[mk]=1;if(lx2<gridRight-14)doc.text(MON[parseInt(c.date.slice(5,7),10)-1],lx2,y+5);}}
+      break;
+    }
+  });
+  // day labels
+  var dayNames=curLang==='en'?['Mo','','We','','Fr','','']:['Mo','','Mi','','Fr','',''];
+  doc.setFontSize(6.5);doc.setTextColor(150,156,168);
+  for(var r=0;r<7;r++){if(dayNames[r])doc.text(dayNames[r],x+labW-4,gy+r*step+cell,{align:'right'});}
+  for(var wi=0;wi<nW;wi++){for(var r2=0;r2<7;r2++){
+    var c2=weeks[wi][r2],col=cellColor(c2.count,c2.inRange);if(!col)continue;
+    doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(ox+wi*step,gy+r2*step,cell,cell,rr,rr,'F');
+  }}
+  // legend
+  var ly=gy+7*step+6,lx=ox,lc=Math.max(cell,4);
+  doc.setFontSize(6.5);doc.setTextColor(150,156,168);
+  doc.text(t('pdf.less'),lx,ly+lc-1);lx+=doc.getTextWidth(t('pdf.less'))+5;
+  [0,1,2,3].forEach(function(lv){var col=cellColor(lv,true);doc.setFillColor(col[0],col[1],col[2]);doc.roundedRect(lx,ly,lc,lc,1,1,'F');lx+=lc+2;});
+  lx+=3;doc.text(t('pdf.more'),lx,ly+lc-1);
+}
+
+// Month-grid heatmap for long ranges: years as rows × 12 months, shaded by entries per month
+function drawMonthHeatmapPdf(doc,x,y,w,availH,focusLogs,startDate,endDate,accArr,MON){
+  var monthCount={};focusLogs.forEach(function(l){var k=l.date.slice(0,7);monthCount[k]=(monthCount[k]||0)+1;});
+  var y0=startDate.getFullYear(),m0=startDate.getMonth()+1,y1=endDate.getFullYear(),m1=endDate.getMonth()+1;
+  // Cap year-rows to what fits the card height (keep the most recent years) so the
+  // grid can never overflow, no matter how extreme the requested range is.
+  var maxRows=Math.max(1,Math.floor((availH-11-12+3)/(7+3)));
+  if(y1-y0>maxRows-1){y0=y1-(maxRows-1);m0=1;}
+  var years=[];for(var yr=y0;yr<=y1;yr++)years.push(yr);
+  var nY=years.length;
+  var maxC=1;Object.keys(monthCount).forEach(function(k){if(monthCount[k]>maxC)maxC=monthCount[k];});
+  function col(c){if(c<=0)return[232,235,242];var a=Math.min(0.22+(c/maxC)*0.78,1);return[Math.round(255+(accArr[0]-255)*a),Math.round(255+(accArr[1]-255)*a),Math.round(255+(accArr[2]-255)*a)];}
+  var labW=26,topH=11,legendH=12,gapx=3,gapy=3;
+  var cellW=(w-labW-11*gapx)/12;
+  var cellH=Math.min(22,(availH-topH-legendH-(nY-1)*gapy)/nY);if(cellH<6)cellH=Math.max(4,(availH-topH-legendH-(nY-1)*gapy)/nY);
+  var stepX=cellW+gapx,stepY=cellH+gapy,ox=x+labW,gy=y+topH;
+  var rr=Math.min(2.5,cellH/2);
+  // month header
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(150,156,168);
+  for(var mi=0;mi<12;mi++)doc.text(MON[mi],ox+mi*stepX+cellW/2,y+topH-4,{align:'center'});
+  // rows
+  years.forEach(function(yr,ri){
+    var ry=gy+ri*stepY;
+    doc.setFont('helvetica','bold');doc.setFontSize(7.5);doc.setTextColor(120,126,140);
+    doc.text(String(yr),x+labW-6,ry+cellH/2+2.5,{align:'right'});
+    for(var mi=0;mi<12;mi++){
+      var mm=mi+1;
+      var inRange=(yr>y0||mm>=m0)&&(yr<y1||mm<=m1);
+      if(!inRange)continue;
+      var k=yr+'-'+String(mm).padStart(2,'0'),c=monthCount[k]||0,rgb=col(c);
+      doc.setFillColor(rgb[0],rgb[1],rgb[2]);doc.roundedRect(ox+mi*stepX,ry,cellW,cellH,rr,rr,'F');
+      if(c>0&&cellH>=9){
+        var light=(c/maxC)>0.5;var fsz=Math.min(8.5,cellH-3);
+        doc.setFont('helvetica','bold');doc.setFontSize(fsz);
+        doc.setTextColor(light?255:70,light?255:74,light?255:84);
+        doc.text(String(c),ox+mi*stepX+cellW/2,ry+cellH/2+fsz/2-1.2,{align:'center'});
+      }
+    }
+  });
+  // legend (anchored to the grid bottom, not an extra trailing gap)
+  var ly=gy+(nY-1)*stepY+cellH+5,lx=ox,lc=8;
+  doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(150,156,168);
+  doc.text(t('pdf.less'),lx,ly+lc-1.5);lx+=doc.getTextWidth(t('pdf.less'))+5;
+  [0,maxC*0.34,maxC*0.67,maxC].forEach(function(lv){var rgb=col(lv);doc.setFillColor(rgb[0],rgb[1],rgb[2]);doc.roundedRect(lx,ly,lc,lc,1.5,1.5,'F');lx+=lc+2;});
+  lx+=3;doc.text(t('pdf.more'),lx,ly+lc-1.5);
+}
 
 // ── IMPORT ────────────────────────────────────────────────
 document.getElementById('btn-imp-open').addEventListener('click',function(){document.getElementById('file-in').click();});
